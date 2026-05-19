@@ -99,6 +99,13 @@ NOTIONS: dict[str, AgentCheck] = {
 }
 
 
+def is_fair_to(instance: Instance, allocation: Allocation, agent: int, notion: str) -> bool:
+    check = NOTIONS.get(notion)
+    if check is None:
+        raise ValueError(f"Unknown fairness notion: {notion!r}")
+    return check(instance, allocation, agent)
+
+
 def is_fair(instance: Instance, allocation: Allocation, notion: str) -> bool:
     """
     Return True iff `allocation` satisfies `notion` for every agent.
