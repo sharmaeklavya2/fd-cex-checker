@@ -49,13 +49,16 @@ class Valuation(ABC):
         ...
 
     @abstractmethod
-    def is_unival(self) -> bool:
-        """True iff all marginal values are equal (at most one distinct value)."""
+    def marginal_range(self) -> tuple[Rational, Rational]:
+        """
+        Returns (min_marginal, max_marginal): the minimum and maximum marginal
+        values across all items and all subsets. Exact for this instance.
+        """
         ...
 
     @abstractmethod
-    def is_bivalued(self) -> bool:
-        """True iff there are at most two distinct marginal values."""
+    def is_k_val(self, k: int) -> bool:
+        """True iff there are at most k distinct marginal values."""
         ...
 
 
@@ -87,6 +90,9 @@ class AdditiveValuation(Valuation):
         self._value_set = frozenset(self._values)
         self._func_types = (self._FUNC_TYPES_SINGLE_ITEM if len(self._values) == 1
                             else self._FUNC_TYPES)
+        self._marginal_range = (
+            (min(self._values), max(self._values)) if self._values else (0, 0)
+        )
 
     def n_items(self) -> int:
         return len(self._values)
@@ -109,11 +115,11 @@ class AdditiveValuation(Valuation):
             any(v > 0 for v in self._values),
         )
 
-    def is_unival(self) -> bool:
-        return len(self._value_set) <= 1
+    def marginal_range(self) -> tuple[Rational, Rational]:
+        return self._marginal_range
 
-    def is_bival(self) -> bool:
-        return len(self._value_set) <= 2
+    def is_k_val(self, k: int) -> bool:
+        return len(self._value_set) <= k
 
     def __repr__(self) -> str:
         return f"AdditiveValuation({self._values!r})"
