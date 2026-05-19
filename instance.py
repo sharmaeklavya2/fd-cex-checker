@@ -36,6 +36,9 @@ class Instance:
     def n_items(self) -> int:
         return self.valuations[0].n_items()
 
+    def all_items(self) -> frozenset[int]:
+        return frozenset(range(self.n_items()))
+
     def has_equal_entitlements(self) -> bool:
         """True iff all agents have the same weight."""
         return len(set(self.weights)) == 1
