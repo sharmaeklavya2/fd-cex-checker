@@ -100,9 +100,29 @@ NOTIONS: dict[str, AgentCheck] = {
 
 
 def is_fair_to(instance: Instance, allocation: Allocation, agent: int, notion: str) -> bool:
-    check = NOTIONS.get(notion)
+    """
+    Return True iff `allocation` satisfies `notion` for `agent`.
+
+    Composite notions:
+      'F1+F2'  – conjunction: both F1 and F2 must hold.
+      'F1|F2'  – disjunction: at least one of F1 or F2 must hold.
+    Mixing '+' and '|' in the same string is not supported.
+    Whitespace around notion names is ignored.
+    """
+    has_and = '+' in notion
+    has_or  = '|' in notion
+    if has_and and has_or:
+        raise ValueError(
+            f"Notion {notion!r} mixes '+' and '|'; use separate checks instead")
+    if has_and:
+        return all(is_fair_to(instance, allocation, agent, n.strip())
+                   for n in notion.split('+'))
+    if has_or:
+        return any(is_fair_to(instance, allocation, agent, n.strip())
+                   for n in notion.split('|'))
+    check = NOTIONS.get(notion.strip())
     if check is None:
-        raise ValueError(f"Unknown fairness notion: {notion!r}")
+        raise ValueError(f"Unknown fairness notion: {notion.strip()!r}")
     return check(instance, allocation, agent)
 
 
@@ -110,9 +130,7 @@ def is_fair(instance: Instance, allocation: Allocation, notion: str) -> bool:
     """
     Return True iff `allocation` satisfies `notion` for every agent.
 
-    Raises ValueError for unknown notion names.
+    Supports the same composite notion syntax as `is_fair_to`.
     """
-    check = NOTIONS.get(notion)
-    if check is None:
-        raise ValueError(f"Unknown fairness notion: {notion!r}")
-    return all(check(instance, allocation, i) for i in range(instance.n_agents()))
+    return all(is_fair_to(instance, allocation, i, notion)
+               for i in range(instance.n_agents()))
