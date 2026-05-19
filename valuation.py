@@ -73,8 +73,10 @@ class AdditiveValuation(Valuation):
     """
 
     _FUNC_TYPES = frozenset({
-        'additive', 'submodular', 'supermodular', 'subadditive', 'superadditive'
+        'general', 'subadd', 'superadd', 'xos', 'submod', 'supermod',
+        'cancelable', 'submodCanc', 'additive',
     })
+    _FUNC_TYPES_SINGLE_ITEM = _FUNC_TYPES | frozenset({'unitDemand', 'singleItem'})
 
     def __init__(self, values: Sequence[Rational]):
         """
@@ -82,6 +84,9 @@ class AdditiveValuation(Valuation):
             values: values[i] is the value of item i, as int or Fraction.
         """
         self._values = list(values)
+        self._value_set = frozenset(self._values)
+        self._func_types = (self._FUNC_TYPES_SINGLE_ITEM if len(self._values) == 1
+                            else self._FUNC_TYPES)
 
     def n_items(self) -> int:
         return len(self._values)
@@ -95,7 +100,7 @@ class AdditiveValuation(Valuation):
         return self._values[item]
 
     def func_types(self) -> frozenset[str]:
-        return self._FUNC_TYPES
+        return self._func_types
 
     def signs(self) -> tuple[bool, bool, bool]:
         return (
@@ -105,10 +110,10 @@ class AdditiveValuation(Valuation):
         )
 
     def is_unival(self) -> bool:
-        return len(set(self._values)) <= 1
+        return len(self._value_set) <= 1
 
     def is_bival(self) -> bool:
-        return len(set(self._values)) <= 2
+        return len(self._value_set) <= 2
 
     def __repr__(self) -> str:
         return f"AdditiveValuation({self._values!r})"
