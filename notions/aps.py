@@ -11,8 +11,8 @@ APS-fairness for agent i under allocation A is checked with a single LP solve:
 let r = v_i(A_i) and s = min{v_i(S) : v_i(S) > r} (the smallest bundle value
 strictly above r, or ∞ if none exists).  Since APS_i equals some bundle value,
 APS_i ≥ s  iff  LP(s) is feasible, and APS_i < s  iff  APS_i ≤ r (fair).
-Values in counterexample instances are small integers or simple fractions, so
-floating-point errors are negligible.
+Values in counterexample instances are small integers or simple fractions,
+so floating-point errors are negligible.
 """
 
 from __future__ import annotations
@@ -67,9 +67,9 @@ def _lp_feasible(sz: list[frozenset[int]], m: int, budget: float) -> bool:
 
 
 def aps_ge(v: Valuation, b: Rational | float, z: Rational, subsets: Sequence[frozenset[int]] | None = None) -> bool:
-    """Return True iff APS(v, b) >= z.
+    """Return True iff APS(v, b) ≥ z.
 
-    v is the agent's valuation, b = w_i / W is the agent's normalized budget,
+    v is the agent's valuation, b = w_i / W is the agent's normalized weight,
     and z is the threshold value to test against.
 
     `subsets` captures the family of allowed bundles. Defaults to all subsets of items.
@@ -79,24 +79,29 @@ def aps_ge(v: Valuation, b: Rational | float, z: Rational, subsets: Sequence[fro
     return _lp_feasible(sz, m, float(b))
 
 
-def aps(instance: Instance, i: int) -> Fraction:
-    """
-    Return agent i's APS as an exact Fraction.
+def aps(v: Valuation, b: Rational | float, subsets: Sequence[frozenset[int]] | None = None) -> Rational:
+    """Returns APS(v, b).
 
-    Iterates over candidate z values (all possible v_i(S) values, largest
-    first) and returns the largest z for which the dual LP is feasible.
-    """
-    v = instance.valuations[i]
-    w = instance.weights
-    b = float(Fraction(w[i]) / sum(w))
+    v is the agent's valuation, b = w_i / W is the agent's normalized weight,
+    and z is the threshold value to test against.
 
-    subsets = _all_subsets(v.n_items())
-    all_values = {v.value(S) for S in subsets}
-    for z in sorted(all_values, reverse=True):
+    `subsets` captures the family of allowed bundles. Defaults to all subsets of items.
+    """
+    m = v.n_items()
+    _subsets = _all_subsets(m) if subsets is None else subsets
+    all_values = sorted({v.value(S) for S in _subsets}, reverse=True)
+    # TODO: speed this up by using binary search instead
+    for z in all_values:
         if aps_ge(v, b, z, subsets):
-            return Fraction(z)
+            return z
+    raise ValueError(f"Could not compute APS")
+    # the above error should never happen if subsets is None
 
-    raise ValueError(f"Could not compute APS for agent {i}")
+
+def aps_instance(instance: Instance, i: int) -> Rational:
+    v, w = instance.valuations[i], instance.weights
+    b = Fraction(w[i], sum(w))
+    return aps(v, b)
 
 
 def is_aps_to(instance: Instance, allocation: Allocation, i: int) -> bool:
@@ -109,9 +114,8 @@ def is_aps_to(instance: Instance, allocation: Allocation, i: int) -> bool:
       - LP(s) infeasible ⟺  APS_i < s  ⟺  APS_i ≤ r  (fair)
     If no bundle has value > r then APS_i ≤ r trivially.
     """
-    v = instance.valuations[i]
-    w = instance.weights
-    b = float(Fraction(w[i]) / sum(w))
+    v, w = instance.valuations[i], instance.weights
+    b = Fraction(w[i], sum(w))
 
     r = v.value(allocation.bundle(i))
     subsets = _all_subsets(v.n_items())
