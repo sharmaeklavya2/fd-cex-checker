@@ -24,13 +24,18 @@ class Valuation(ABC):
 
     @abstractmethod
     def value(self, subset: Set[int]) -> Rational:
-        """Value of a set of items."""
+        """Value of an item or a set of items."""
         ...
 
-    def marginal(self, item: int, subset: Set[int]) -> Rational:
-        """Marginal value of adding `item` to `subset`. Item must not be in subset."""
-        assert item not in subset
-        return self.value(subset | {item}) - self.value(subset)
+    def marginal_gain(self, g: int, S: Set[int]) -> Rational:
+        """Marginal gain of adding `g` to `S`. g must not be in S."""
+        assert g not in S
+        return self.value(S | {g}) - self.value(S)
+
+    def marginal_loss(self, g: int, S: Set[int]) -> Rational:
+        """Marginal loss of removing `g` from `S`. g must be in S."""
+        assert g in S
+        return self.value(S) - self.value(S - {g})
 
     @abstractmethod
     def func_types(self) -> frozenset[str]:
@@ -66,6 +71,10 @@ class Valuation(ABC):
 # Concrete valuation classes
 # =============================================================================
 
+SUBMOD_FTYPES = frozenset({'submod', 'xos', 'subadd', 'general'})
+ADD_FTYPES = SUBMOD_FTYPES | {'additive', 'cancelable', 'submodCanc', 'supermod', 'superadd'}
+SI_FTYPES = ADD_FTYPES | {'unitDemand', 'singleItem'}
+
 class AdditiveValuation(Valuation):
     """
     Additive valuation: value(S) = sum of values of items in S.
@@ -75,12 +84,6 @@ class AdditiveValuation(Valuation):
     subadditive, and superadditive.
     """
 
-    _FUNC_TYPES = frozenset({
-        'general', 'subadd', 'superadd', 'xos', 'submod', 'supermod',
-        'cancelable', 'submodCanc', 'additive',
-    })
-    _FUNC_TYPES_SINGLE_ITEM = _FUNC_TYPES | frozenset({'unitDemand', 'singleItem'})
-
     def __init__(self, values: Sequence[Rational]):
         """
         Args:
@@ -88,8 +91,7 @@ class AdditiveValuation(Valuation):
         """
         self._values = list(values)
         self._value_set = frozenset(self._values)
-        self._func_types = (self._FUNC_TYPES_SINGLE_ITEM if len(self._values) == 1
-                            else self._FUNC_TYPES)
+        self._func_types = (SI_FTYPES if len(self._values) == 1 else ADD_FTYPES)
         self._marginal_range = (
             (min(self._values), max(self._values)) if self._values else (0, 0)
         )
@@ -100,10 +102,13 @@ class AdditiveValuation(Valuation):
     def value(self, subset: Set[int]) -> Rational:
         return sum(self._values[i] for i in subset)  # sum of empty sequence is 0
 
-    def marginal(self, item: int, subset: Set[int]) -> Rational:
-        """O(1) override: marginal of item i is always values[i]."""
-        assert item not in subset
-        return self._values[item]
+    def marginal_gain(self, g: int, S: Set[int]) -> Rational:
+        assert g not in S
+        return self._values[g]
+
+    def marginal_loss(self, g: int, S: Set[int]) -> Rational:
+        assert g in S
+        return self._values[g]
 
     def func_types(self) -> frozenset[str]:
         return self._func_types
