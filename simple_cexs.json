@@ -1,0 +1,17 @@
+{"counterexamples": [
+    {
+        "satisfies": "MMS", "butNot": "PROP",
+        "id": "mms-not-prop-1",
+        "under": {"valuation": "singleItem", "marginal": "unit", "twoAg": true, "identical": true, "eqEnt": true}
+    },
+    {
+        "satisfies": "PROP", "butNot": "EF",
+        "id": "prop-not-ef-1",
+        "under": {"valuation": "additive", "marginal": "positive", "eqEnt": true}
+    },
+    {
+        "satisfies": "PROP", "butNot": "EF",
+        "id": "prop-not-ef-2",
+        "under": {"valuation": "additive", "marginal": "negative", "eqEnt": true}
+    }
+]}
