@@ -5,10 +5,12 @@ from fractions import Fraction
 import pytest
 
 from valuation import AdditiveValuation
-from valuation_extra import UnitDemandValuation
+from valuation_extra import UnitDemandValuation, GeneralValuation
+from notions.utils import all_subsets
 from instance import Instance
 from allocation import Allocation
 from notions.aps import aps_instance, is_aps_to, aps_ge
+from notions.basic import wmms
 
 
 # ---------------------------------------------------------------------------
@@ -127,4 +129,26 @@ class TestOrigApsPaperExamples:
             assert aps_ge(v, b, known_aps)
             assert not aps_ge(v, b, known_aps+1)
 
-    # Remark 2: example with submodular valuations
+    def test_n2(self):
+        # Remark 2: example with submodular valuations
+        m = 6
+        C = {frozenset({0, 1, 2}), frozenset({0, 4, 5}), frozenset({1, 3, 5}), frozenset({2, 3, 4})}
+        values = {}
+        for S in all_subsets(m):
+            if len(S) == 0:
+                values[S] = 0
+            elif len(S) == 1:
+                values[S] = 1
+            elif len(S) == 2:
+                values[S] = 4
+            elif len(S) == 3 and S not in C:
+                values[S] = 5
+            else:
+                values[S] = 6
+        v = GeneralValuation(m, values)
+        half = Fraction(1, 2)
+        assert aps_ge(v, half, 6)
+        assert not aps_ge(v, half, 7)
+        instance = Instance([v, v])
+        mms = wmms(instance, 0)
+        assert mms == 5
