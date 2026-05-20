@@ -45,13 +45,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Verify fair-division counterexamples.")
     parser.add_argument("file", type=Path,
-                        help="Python file exposing a COUNTEREXAMPLES list")
+        help="Python file exposing a COUNTEREXAMPLES list")
     args = parser.parse_args()
 
-    cexs = load_counterexamples(args.file)
+    cexs_list = load_counterexamples(args.file)
+    cexs_dict = {}
+    for cex in cexs_list:
+        if cex.id in cexs_dict:
+            raise Exception(f'duplicate id {cex.id}')
+        else:
+            cexs_dict[cex.id] = cex
 
     failed = 0
-    for cex in cexs:
+    for cex in cexs_list:
         errors = cex.verify()
         if errors:
             failed += 1
@@ -60,7 +66,7 @@ def main() -> None:
             for err in errors:
                 print(f"  - {err}", file=sys.stderr)
 
-    total = len(cexs)
+    total = len(cexs_list)
     passed = total - failed
     print(f"{passed}/{total} counterexamples passed.", file=sys.stderr)
     sys.exit(0 if failed == 0 else 1)
