@@ -66,7 +66,7 @@ def _lp_feasible(sz: list[frozenset[int]], m: int, budget: float) -> bool:
     return res.status == 0
 
 
-def aps_ge(v: Valuation, b: float, z: Rational, subsets: Sequence[frozenset[int]] | None = None) -> bool:
+def aps_ge(v: Valuation, b: Rational | float, z: Rational, subsets: Sequence[frozenset[int]] | None = None) -> bool:
     """Return True iff APS(v, b) >= z.
 
     v is the agent's valuation, b = w_i / W is the agent's normalized budget,
@@ -76,7 +76,7 @@ def aps_ge(v: Valuation, b: float, z: Rational, subsets: Sequence[frozenset[int]
     """
     m = v.n_items()
     sz = [S for S in (_all_subsets(m) if subsets is None else subsets) if v.value(S) >= z]
-    return _lp_feasible(sz, m, b)
+    return _lp_feasible(sz, m, float(b))
 
 
 def aps(instance: Instance, i: int) -> Fraction:
