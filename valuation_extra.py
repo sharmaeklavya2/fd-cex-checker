@@ -34,7 +34,7 @@ class UnitDemandValuation(Valuation):
         else:
             self._marginal_range = (shift, shift + self._values_sorted[-1])
             if shift == 0 or m <= 3:
-                self._func_types = SUBMOD_FTYPES | {'submodCanc', 'cancelable'}
+                self._func_types = SUBMOD_FTYPES | frozenset({'submodCanc', 'cancelable'})
             else:
                 self._func_types = SUBMOD_FTYPES
 

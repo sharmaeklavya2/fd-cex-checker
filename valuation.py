@@ -72,8 +72,8 @@ class Valuation(ABC):
 # =============================================================================
 
 SUBMOD_FTYPES = frozenset({'submod', 'xos', 'subadd', 'general'})
-ADD_FTYPES = SUBMOD_FTYPES | {'additive', 'cancelable', 'submodCanc', 'supermod', 'superadd'}
-SI_FTYPES = ADD_FTYPES | {'unitDemand', 'singleItem'}
+ADD_FTYPES = SUBMOD_FTYPES | frozenset({'additive', 'cancelable', 'submodCanc', 'supermod', 'superadd'})
+SI_FTYPES = ADD_FTYPES | frozenset({'unitDemand', 'singleItem'})
 
 class AdditiveValuation(Valuation):
     """
