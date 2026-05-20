@@ -5,6 +5,7 @@ from fractions import Fraction
 import pytest
 
 from valuation import AdditiveValuation
+from valuation_extra import UnitDemandValuation
 from instance import Instance
 from allocation import Allocation
 from notions.aps import aps_instance, is_aps_to, aps_ge
@@ -119,5 +120,11 @@ class TestOrigApsPaperExamples:
         assert aps_ge(v, b, known_aps)
         assert not aps_ge(v, b, known_aps+1)
 
-    # 3.1.1: for unit demand valuations, APS is value of item of rank ceil(1/b).
+    def test_ud(self):
+        # 3.1.1: for unit demand valuations, APS is value of item of rank ceil(1/b).
+        v = UnitDemandValuation([3, 5, 7, 9])
+        for b, known_aps in [(0.2, 0), (0.4, 5), (0.6, 7), (1, 9)]:
+            assert aps_ge(v, b, known_aps)
+            assert not aps_ge(v, b, known_aps+1)
+
     # Remark 2: example with submodular valuations
