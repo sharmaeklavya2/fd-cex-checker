@@ -46,6 +46,8 @@ def main() -> None:
         description="Verify fair-division counterexamples.")
     parser.add_argument("file", type=Path,
         help="Python file exposing a COUNTEREXAMPLES list")
+    parser.add_argument('--no-verify', action='store_false', dest='verify', default=True,
+        help='Do not check correctness of counterexamples.')
     args = parser.parse_args()
 
     cexs_list = load_counterexamples(args.file)
@@ -58,17 +60,19 @@ def main() -> None:
 
     failed = 0
     for cex in cexs_list:
-        errors = cex.verify()
-        if errors:
-            failed += 1
-            print(f"FAIL [{cex.id}] ({cex.satisfies} doesn't imply {cex.violates}):",
-                  file=sys.stderr)
-            for err in errors:
-                print(f"  - {err}", file=sys.stderr)
+        if args.verify:
+            errors = cex.verify()
+            if errors:
+                failed += 1
+                print(f"FAIL [{cex.id}] ({cex.satisfies} doesn't imply {cex.violates}):",
+                      file=sys.stderr)
+                for err in errors:
+                    print(f"  - {err}", file=sys.stderr)
 
-    total = len(cexs_list)
-    passed = total - failed
-    print(f"{passed}/{total} counterexamples passed.", file=sys.stderr)
+    if args.verify:
+        total = len(cexs_list)
+        passed = total - failed
+        print(f"{passed}/{total} counterexamples passed.", file=sys.stderr)
     sys.exit(0 if failed == 0 else 1)
 
 
