@@ -66,7 +66,7 @@ def match_json_file(fpath: Path, cexs_dict: Mapping[str, Counterexample]) -> int
         if 'id' not in cex_spec:
             n_ignored += 1
         elif cex_spec['id'] in cexs_spec_ids:
-            raise Exception(f'duplicate id {cex_spec['id']} in JSON file')
+            raise Exception(f"duplicate id {cex_spec['id']} in JSON file")
         else:
             idStr = cex_spec['id']
             cexs_spec_ids.add(idStr)
@@ -82,7 +82,7 @@ def match_json_file(fpath: Path, cexs_dict: Mapping[str, Counterexample]) -> int
                     n_failed += 1
                 else:
                     n_matched += 1
-    print(f'JSON status:', n_matched, 'matched,', n_ignored, 'ignored,',
+    print('JSON status:', n_matched, 'matched,', n_ignored, 'ignored,',
         n_not_found, 'not found,', n_failed, 'failed.', file=sys.stderr)
     return int(n_failed + n_not_found > 0)
 
