@@ -18,7 +18,7 @@ import argparse
 import importlib.util
 import sys
 import json
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from conditions import Conditions, verify_conditions
@@ -43,7 +43,7 @@ def load_counterexamples(path: Path) -> Sequence[Counterexample]:
     return cexs
 
 
-def match(cex_spec: dict[str, object], cex: Counterexample) -> list[str]:
+def match_cex(cex_spec: dict[str, object], cex: Counterexample) -> list[str]:
     satisfies, violates = cex_spec['satisfies'], cex_spec['butNot']
     conditions: Conditions =  cex_spec['under']  # type: ignore
     errors = []
@@ -55,6 +55,36 @@ def match(cex_spec: dict[str, object], cex: Counterexample) -> list[str]:
         return errors
     else:
         return verify_conditions(cex.instance, conditions)
+
+
+def match_json_file(fpath: Path, cexs_dict: Mapping[str, Counterexample]) -> int:
+    with open(fpath) as fp:
+        cexs_spec_list = json.load(fp)['counterexamples']
+    cexs_spec_ids = set()
+    n_ignored, n_not_found, n_failed, n_matched = 0, 0, 0, 0
+    for cex_spec in cexs_spec_list:
+        if 'id' not in cex_spec:
+            n_ignored += 1
+        elif cex_spec['id'] in cexs_spec_ids:
+            raise Exception(f'duplicate id {cex_spec['id']} in JSON file')
+        else:
+            idStr = cex_spec['id']
+            cexs_spec_ids.add(idStr)
+            cex = cexs_dict.get(idStr)
+            if cex is None:
+                print(f'id {idStr} in JSON file is missing from Python file', file=sys.stderr)
+                n_not_found += 1
+            else:
+                match_errors = match_cex(cex_spec, cex)
+                if match_errors:
+                    for error in match_errors:
+                        print(error, file=sys.stderr)
+                    n_failed += 1
+                else:
+                    n_matched += 1
+    print(f'JSON status:', n_matched, 'matched,', n_ignored, 'ignored,',
+        n_not_found, 'not found,', n_failed, 'failed.', file=sys.stderr)
+    return int(n_failed + n_not_found > 0)
 
 
 def main() -> None:
@@ -78,32 +108,9 @@ def main() -> None:
             cexs_dict[cex.id] = cex
 
     # match with args.cpigjs_json
+    exit_status = 0
     if args.cpigjs_json:
-        with open(args.cpigjs_json) as fp:
-            cexs_spec_list = json.load(fp)['counterexamples']
-        cexs_spec_ids = set()
-        n_ignored, n_failed, n_matched = 0, 0, 0
-        for cex_spec in cexs_spec_list:
-            if 'id' not in cex_spec:
-                n_ignored += 1
-            elif cex_spec['id'] in cexs_spec_ids:
-                raise Exception(f'duplicate id {cex_spec['id']} in JSON file')
-            else:
-                idStr = cex_spec['id']
-                cexs_spec_ids.add(idStr)
-                cex = cexs_dict.get(idStr)
-                if cex is None:
-                    print(f'id {idStr} in JSON file is missing from Python file', file=sys.stderr)
-                    n_ignored += 1
-                else:
-                    match_errors = match(cex_spec, cex)
-                    if match_errors:
-                        for error in match_errors:
-                            print(error, file=sys.stderr)
-                        n_failed += 1
-                    else:
-                        n_matched += 1
-        print(f'JSON status: {n_matched} matched, {n_ignored} ignored, {n_failed} failed.', file=sys.stderr)
+        exit_status = match_json_file(args.cpigjs_json, cexs_dict)
 
     # verify counterexamples
     failed = 0
@@ -122,7 +129,9 @@ def main() -> None:
         total = len(cexs_list)
         passed = total - failed
         print(f"{passed}/{total} counterexamples passed.", file=sys.stderr)
-    sys.exit(0 if failed == 0 else 1)
+    if failed > 0:
+        exit_status = 1
+    sys.exit(exit_status)
 
 
 if __name__ == "__main__":
