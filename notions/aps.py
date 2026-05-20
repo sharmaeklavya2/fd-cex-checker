@@ -68,7 +68,7 @@ def aps_ge(v: Valuation, b: Rational | float, z: Rational, subsets: Sequence[fro
     `subsets` captures the family of allowed bundles. Defaults to all subsets of items.
     """
     m = v.n_items()
-    sz = [S for S in (all_subsets(m) if subsets is None else subsets) if v.value(S) >= z]
+    sz = [S for S in (all_subsets(m) if subsets is None else subsets) if v(S) >= z]
     return _lp_feasible(sz, m, float(b))
 
 
@@ -82,7 +82,7 @@ def aps(v: Valuation, b: Rational | float, subsets: Sequence[frozenset[int]] | N
     """
     m = v.n_items()
     _subsets = all_subsets(m) if subsets is None else subsets
-    all_values = sorted({v.value(S) for S in _subsets}, reverse=True)
+    all_values = sorted({v(S) for S in _subsets}, reverse=True)
     # TODO: speed this up by using binary search instead
     for z in all_values:
         if aps_ge(v, b, z, subsets):
@@ -110,9 +110,9 @@ def is_aps_to(instance: Instance, allocation: Allocation, i: int) -> bool:
     v, w = instance.valuations[i], instance.weights
     b = Fraction(w[i], sum(w))
 
-    r = v.value(allocation.bundle(i))
+    r = v(allocation.bundle(i))
     subsets = all_subsets(v.n_items())
-    above = [v.value(S) for S in subsets if v.value(S) > r]
+    above = [v(S) for S in subsets if v(S) > r]
     if not above:
         return True   # r is already the maximum possible value
 

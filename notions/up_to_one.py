@@ -21,7 +21,7 @@ def is_ef1_to(instance: Instance, allocation: Allocation, i: int) -> bool:
     """
     v, w = instance.valuations[i], instance.weights
     A_i = allocation.bundle(i)
-    v_own = v.value(A_i)
+    v_own = v(A_i)
 
     # max value after removing a chore (if it exists)
     v_own_better = v_own + max(0, max([-v.marginal_loss(c, A_i) for c in A_i], default=0))
@@ -30,7 +30,7 @@ def is_ef1_to(instance: Instance, allocation: Allocation, i: int) -> bool:
         if j == i:
             continue
         A_j = allocation.bundle(j)
-        v_other = v.value(A_j)
+        v_other = v(A_j)
 
         # Conditions 1 and 3: no envy up to a chore
         if Fraction(v_own_better, w[i]) >= Fraction(v_other, w[j]):

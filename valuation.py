@@ -27,6 +27,9 @@ class Valuation(ABC):
         """Value of an item or a set of items."""
         ...
 
+    def __call__(self, subset: Set[int]) -> Rational:
+        return self.value(subset)
+
     def marginal_gain(self, g: int, S: Set[int]) -> Rational:
         """Marginal gain of adding `g` to `S`. g must not be in S."""
         assert g not in S
