@@ -25,18 +25,11 @@ import numpy as np
 from scipy.optimize import linprog
 
 from valuation import Valuation, Rational
+from notions.utils import all_subsets
 from instance import Instance
 from allocation import Allocation
 
 
-def _all_subsets(m: int) -> list[frozenset[int]]:
-    """Return all 2^m subsets of {0, ..., m-1} as frozensets."""
-    items = range(m)
-    return [
-        frozenset(S)
-        for r in range(m + 1)
-        for S in itertools.combinations(items, r)
-    ]
 
 
 def _lp_feasible(sz: list[frozenset[int]], m: int, budget: float) -> bool:
@@ -75,7 +68,7 @@ def aps_ge(v: Valuation, b: Rational | float, z: Rational, subsets: Sequence[fro
     `subsets` captures the family of allowed bundles. Defaults to all subsets of items.
     """
     m = v.n_items()
-    sz = [S for S in (_all_subsets(m) if subsets is None else subsets) if v.value(S) >= z]
+    sz = [S for S in (all_subsets(m) if subsets is None else subsets) if v.value(S) >= z]
     return _lp_feasible(sz, m, float(b))
 
 
@@ -88,7 +81,7 @@ def aps(v: Valuation, b: Rational | float, subsets: Sequence[frozenset[int]] | N
     `subsets` captures the family of allowed bundles. Defaults to all subsets of items.
     """
     m = v.n_items()
-    _subsets = _all_subsets(m) if subsets is None else subsets
+    _subsets = all_subsets(m) if subsets is None else subsets
     all_values = sorted({v.value(S) for S in _subsets}, reverse=True)
     # TODO: speed this up by using binary search instead
     for z in all_values:
@@ -118,7 +111,7 @@ def is_aps_to(instance: Instance, allocation: Allocation, i: int) -> bool:
     b = Fraction(w[i], sum(w))
 
     r = v.value(allocation.bundle(i))
-    subsets = _all_subsets(v.n_items())
+    subsets = all_subsets(v.n_items())
     above = [v.value(S) for S in subsets if v.value(S) > r]
     if not above:
         return True   # r is already the maximum possible value

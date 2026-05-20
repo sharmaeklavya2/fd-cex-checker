@@ -18,3 +18,12 @@ def all_allocations(n_agents: int, n_items: int) -> Iterator[Allocation]:
     """
     for owner in itertools.product(range(n_agents), repeat=n_items):
         yield Allocation(owner=owner, n_agents=n_agents)
+
+def all_subsets(m: int) -> list[frozenset[int]]:
+    """Return all 2^m subsets of {0, ..., m-1} as frozensets."""
+    items = range(m)
+    return [
+        frozenset(S)
+        for r in range(m + 1)
+        for S in itertools.combinations(items, r)
+    ]
