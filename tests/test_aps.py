@@ -104,12 +104,20 @@ class TestOrigApsPaperExamples:
     by Babaioff, Ezra, Feige (doi:10.1287/moor.2021.0199).
     """
     def test_example1(self):
+        # Example 1
         v = AdditiveValuation([2, 1, 1, 1, 0])
         b = Fraction(2, 5)
         known_aps = 2
         for z in range(0, 6):
             assert aps_ge(v, b, z) == (known_aps >= z)
 
+    def test_aps_gt_mms(self):
+        # Lemma C.1: additive valuations, n=3, m=15.
+        v = AdditiveValuation([5,5,5,7,7,7,11,17,23,23,23,31,31,31,65])
+        b = Fraction(1, 3)
+        known_aps = 97
+        assert aps_ge(v, b, known_aps)
+        assert not aps_ge(v, b, known_aps+1)
+
     # 3.1.1: for unit demand valuations, APS is value of item of rank ceil(1/b).
     # Remark 2: example with submodular valuations
-    # Lemma C.1: additive valuations, n=3, m=15.
