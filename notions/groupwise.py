@@ -116,3 +116,22 @@ def get_groupwise(check: AgentCheck) -> AgentCheck:
         return True
 
     return groupwise_check
+
+
+def get_pairwise(check: AgentCheck) -> AgentCheck:
+    """
+    Return the pairwise variant of a per-agent fairness check.
+
+    The returned function returns True iff for every other agent j, check holds
+    for agent 0 in the restriction of the instance and allocation to agents [i, j].
+    """
+    def pairwise_check(instance: Instance, allocation: Allocation, i: int) -> bool:
+        for j in range(instance.n_agents()):
+            if j == i:
+                continue
+            r_instance, r_alloc = get_restricted_alloc(instance, allocation, [i, j])
+            if not check(r_instance, r_alloc, 0):
+                return False
+        return True
+
+    return pairwise_check

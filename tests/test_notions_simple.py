@@ -10,12 +10,14 @@ from notions.aps import is_aps_to
 from notions.up_to_one import is_ef1_to, is_prop1_to
 from notions.up_to_any import is_efx_to, is_propx_to, is_propavg_to, is_propm_to
 from notions.epistemic import get_epistemic, get_min_fs
-from notions.groupwise import get_groupwise
+from notions.groupwise import get_groupwise, get_pairwise
 
 import pytest
 
 APPROX_EFY_NOTIONS = [is_ef1_to, is_efx_to,
-    get_groupwise(is_mms_to), get_groupwise(is_aps_to)]
+    get_groupwise(is_mms_to), get_groupwise(is_aps_to),
+    get_pairwise(is_mms_to), get_pairwise(is_aps_to)]
+
 APPROX_SHAREY_NOTIONS = [is_mms_to, is_aps_to,
     is_prop1_to, is_propx_to, is_propavg_to, is_propm_to,
     get_epistemic(is_ef1_to), get_epistemic(is_efx_to),
