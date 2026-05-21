@@ -13,9 +13,15 @@ from notions.epistemic import get_epistemic, get_min_fs
 
 import pytest
 
-APPROX_NOTIONS = [is_ef1_to, is_prop1_to, is_mms_to, is_aps_to,
-    is_efx_to, is_propx_to, is_propm_to, is_propavg_to]
+APPROX_EFY_NOTIONS = [is_ef1_to, is_efx_to]
+APPROX_SHAREY_NOTIONS = [is_mms_to, is_aps_to,
+    is_prop1_to, is_propx_to, is_propavg_to, is_propm_to,
+    get_epistemic(is_ef1_to), get_epistemic(is_efx_to),
+    get_min_fs(is_ef1_to), get_min_fs(is_efx_to)]
 
+APPROX_NOTIONS = APPROX_EFY_NOTIONS + APPROX_SHAREY_NOTIONS
+
+#=[ 1 or 2 items ]==============================================================
 
 @pytest.mark.parametrize("eqEnt, f", [(True, f) for f in APPROX_NOTIONS]
     + [(False, f) for f in (is_ef1_to, is_prop1_to, is_aps_to)])
@@ -45,6 +51,7 @@ def test_two_items(t: int, a: int, f: AgentCheck) -> None:
     assert f(I, B, 0)
     assert not f(I, B, 1)
 
+#=[ house, car, pen instances ]=================================================
 
 def get_house_car_pen() -> tuple[Instance, Allocation, Allocation]:
     v = AdditiveValuation([100, 10, 1])
@@ -92,10 +99,7 @@ def test_aids_typhoid_flu_strong(f: AgentCheck) -> None:
     assert f(I, ok_alloc, 0)
     assert not f(I, ok_alloc, 1)
 
-APPROX_SHAREY_NOTIONS = [is_mms_to, is_aps_to,
-    is_prop1_to, is_propx_to, is_propavg_to, is_propm_to,
-    get_epistemic(is_ef1_to), get_epistemic(is_efx_to),
-    get_min_fs(is_ef1_to), get_min_fs(is_efx_to)]
+#=[ MYOB ]======================================================================
 
 def get_myob_alloc(t: int, n: int) -> tuple[Instance, Allocation, Allocation]:
     assert t != 0
