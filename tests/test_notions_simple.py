@@ -8,11 +8,11 @@ from notions import AgentCheck
 from notions.basic import is_mms_to
 from notions.aps import is_aps_to
 from notions.up_to_one import is_ef1_to, is_prop1_to
-from notions.up_to_any import is_efx_to
+from notions.up_to_any import is_efx_to, is_propx_to
 
 import pytest
 
-APPROX_NOTIONS = [is_ef1_to, is_prop1_to, is_mms_to, is_aps_to, is_efx_to]
+APPROX_NOTIONS = [is_ef1_to, is_prop1_to, is_mms_to, is_aps_to, is_efx_to, is_propx_to]
 
 
 @pytest.mark.parametrize("eqEnt, f", [(True, f) for f in APPROX_NOTIONS]
@@ -82,7 +82,7 @@ def test_aids_typhoid_flu_weak(f: AgentCheck) -> None:
         assert f(I, ok_alloc, i)
         assert f(I, better_alloc, i)
 
-@pytest.mark.parametrize("f", [is_mms_to, is_aps_to, is_efx_to])
+@pytest.mark.parametrize("f", [is_mms_to, is_aps_to, is_efx_to, is_propx_to])
 def test_aids_typhoid_flu_strong(f: AgentCheck) -> None:
     I, better_alloc, ok_alloc = get_aids_typhoid_flu()
     assert f(I, better_alloc, 0)

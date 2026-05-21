@@ -138,3 +138,30 @@ def is_efx_to(instance: Instance, allocation: Allocation, i: int) -> bool:
             if Fraction(v_own_better, w[i]) < Fraction(v(A_j), w[j]):
                 return False
         return True
+
+
+def is_propx_to(instance: Instance, allocation: Allocation, i: int) -> bool:
+    v, w = instance.valuations[i], instance.weights
+    A_i, M = allocation.bundle(i), instance.all_items()
+
+    v_own = v(A_i)
+    PROP = Fraction(w[i] / sum(w)) * v(M)
+    if v_own >= PROP:
+        return True
+
+    has_neg, _, has_pos = v.signs()
+    if has_neg and has_pos:
+        raise NotImplementedError("PROPx is not implemented for mixed manna.")
+    assert has_neg or has_pos   # if neither is True, we have a PROP allocation
+
+    if has_pos:
+        A_rest = M - A_i
+        claimable_sets = get_claimables_goods(v, A_rest, A_i)
+        for S in claimable_sets:
+            if v_own + v.marginal_gain(S, A_i) <= PROP:
+                return False
+        return True
+    else:
+        min_marg_disutil = get_chores_inc_value(v, A_i)
+        v_own_better = v_own + min_marg_disutil
+        return v_own_better > PROP
