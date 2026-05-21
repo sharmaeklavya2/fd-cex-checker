@@ -8,13 +8,12 @@ from typing import Callable
 
 from instance import Instance
 from allocation import Allocation
+from notions.utils import AgentCheck
 from notions.basic import is_ef_to, is_prop_to, is_mms_to
 from notions.aps import is_aps_to
 from notions.up_to_one import is_ef1_to, is_prop1_to
 from notions.up_to_any import is_efx_to, is_propx_to, is_propm_to, is_propavg_to
 
-# Type alias for per-agent fairness checks.
-AgentCheck = Callable[[Instance, Allocation, int], bool]
 
 NOTIONS: dict[str, AgentCheck] = {
     'EF':   is_ef_to,

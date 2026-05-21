@@ -6,9 +6,14 @@ from __future__ import annotations
 
 import itertools
 from collections.abc import Iterable, Iterator
+from typing import Callable
 
 from valuation import Rational
 from allocation import Allocation
+from instance import Instance
+
+
+AgentCheck = Callable[[Instance, Allocation, int], bool]
 
 
 def max0(C: Iterable[Rational]) -> Rational:

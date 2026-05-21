@@ -4,7 +4,7 @@ from valuation import AdditiveValuation
 from instance import Instance
 from allocation import Allocation
 
-from notions import AgentCheck
+from notions.utils import AgentCheck
 from notions.basic import is_mms_to
 from notions.aps import is_aps_to
 from notions.up_to_one import is_ef1_to, is_prop1_to

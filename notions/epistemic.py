@@ -9,13 +9,11 @@ from __future__ import annotations
 
 import itertools
 from collections.abc import Iterator
-from typing import Callable, Protocol
+from typing import Protocol
 
 from instance import Instance
 from allocation import Allocation
-from notions.utils import all_allocations
-
-AgentCheck = Callable[[Instance, Allocation, int], bool]
+from notions.utils import all_allocations, AgentCheck
 
 class EpistemicAgentCheck(Protocol):
     def __call__(self, instance: Instance, allocation: Allocation, i: int,
