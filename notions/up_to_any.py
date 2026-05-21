@@ -152,7 +152,7 @@ def is_propx_to(instance: Instance, allocation: Allocation, i: int) -> bool:
     has_neg, _, has_pos = v.signs()
     if has_neg and has_pos:
         raise NotImplementedError("PROPx is not implemented for mixed manna.")
-    assert has_neg or has_pos   # if neither is True, we have a PROP allocation
+    assert has_neg or has_pos
 
     if has_pos:
         A_rest = M - A_i
@@ -163,5 +163,44 @@ def is_propx_to(instance: Instance, allocation: Allocation, i: int) -> bool:
         return True
     else:
         min_marg_disutil = get_chores_inc_value(v, A_i)
-        v_own_better = v_own + min_marg_disutil
-        return v_own_better > PROP
+        return v_own + min_marg_disutil > PROP
+
+
+def is_propm_propavg_to(instance: Instance, allocation: Allocation, i: int) -> tuple[bool, bool]:
+    v, w = instance.valuations[i], instance.weights
+    A_i, M = allocation.bundle(i), instance.all_items()
+
+    v_own = v(A_i)
+    PROP = Fraction(w[i] / sum(w)) * v(M)
+    if v_own >= PROP:
+        return (True, True)
+
+    has_neg, _, has_pos = v.signs()
+    if has_neg and has_pos:
+        raise NotImplementedError("PROPm/PROPavg is not implemented for mixed manna.")
+    assert has_neg or has_pos
+
+    if has_pos:
+        n = instance.n_agents()
+        T = []
+        for j in range(n):
+            if j == i:
+                continue
+            A_j = allocation.bundle(j)
+            claimable_sets = get_claimables_goods(v, A_j, A_i)
+            if claimable_sets:
+                T.append(min(v.marginal_gain(S, A_i) for S in claimable_sets))
+        is_propm = (len(T) == 0 or v_own + max(T) > PROP)
+        is_propavg = (len(T) == 0 or v_own + Fraction(sum(T), len(T)) > PROP)
+        return (is_propm, is_propavg)
+    else:
+        min_marg_disutil = get_chores_inc_value(v, A_i)
+        result = (v_own + min_marg_disutil > PROP)
+        return (result, result)
+
+
+def is_propm_to(instance: Instance, allocation: Allocation, i: int) -> bool:
+    return is_propm_propavg_to(instance, allocation, i)[0]
+
+def is_propavg_to(instance: Instance, allocation: Allocation, i: int) -> bool:
+    return is_propm_propavg_to(instance, allocation, i)[1]
