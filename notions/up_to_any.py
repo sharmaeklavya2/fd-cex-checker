@@ -132,6 +132,7 @@ def is_efx_to(instance: Instance, allocation: Allocation, i: int) -> bool:
         if v_own == 0:
             return True
         min_marg_disutil = get_chores_inc_value(v, A_i)
+        assert min_marg_disutil > 0
         v_own_better = v_own + min_marg_disutil
         for j in range(n):
             A_j = allocation.bundle(j)
@@ -145,7 +146,7 @@ def is_propx_to(instance: Instance, allocation: Allocation, i: int) -> bool:
     A_i, M = allocation.bundle(i), instance.all_items()
 
     v_own = v(A_i)
-    PROP = Fraction(w[i] / sum(w)) * v(M)
+    PROP = Fraction(w[i], sum(w)) * v(M)
     if v_own >= PROP:
         return True
 
@@ -171,7 +172,7 @@ def is_propm_propavg_to(instance: Instance, allocation: Allocation, i: int) -> t
     A_i, M = allocation.bundle(i), instance.all_items()
 
     v_own = v(A_i)
-    PROP = Fraction(w[i] / sum(w)) * v(M)
+    PROP = Fraction(w[i], sum(w)) * v(M)
     if v_own >= PROP:
         return (True, True)
 
