@@ -14,12 +14,14 @@ import pytest
 APPROX_NOTIONS = [is_ef1_to, is_prop1_to, is_mms_to, is_aps_to]
 
 
-@pytest.mark.parametrize("f", APPROX_NOTIONS)
+@pytest.mark.parametrize("eqEnt, f", [(True, f) for f in APPROX_NOTIONS]
+    + [(False, f) for f in (is_ef1_to, is_prop1_to, is_aps_to)])
 @pytest.mark.parametrize("n", (2, 3))
 @pytest.mark.parametrize("t", (1, -1))
-def test_single_item(n: int, t: int, f: AgentCheck) -> None:
+def test_single_item(n: int, t: int, eqEnt: bool, f: AgentCheck) -> None:
     v = AdditiveValuation([t])
-    I = Instance([v] * n)
+    w = [1] * n if eqEnt else [3**i for i in range(n)]
+    I = Instance([v] * n, w)
     A = Allocation(owner=[0], n_agents=n)
     for i in range(n):
         assert f(I, A, i)
