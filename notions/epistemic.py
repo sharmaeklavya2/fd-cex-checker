@@ -67,11 +67,10 @@ def get_min_fs(check: AgentCheck) -> EpistemicAgentCheck:
     Return the min-share variant of a per-agent fairness check.
 
     The returned function returns True iff there exists a certificate
-    allocation B with v_i(B_i) ≥ v_i(A_i) such that check(instance, B, i) is True.
-    It enumerates all ways to distribute M \\ A_i among the other agents.
+    allocation B with v_i(B_i) ≤ v_i(A_i) such that check(instance, B, i) is True.
     """
     def min_fs_check(instance: Instance, allocation: Allocation, i: int, cert: Allocation | None = None) -> bool:
-        v = instance.valuations[0]
+        v = instance.valuations[i]
         v_own = v(allocation.bundle(i))
         if cert is not None:
             if v(cert.bundle(i)) > v_own:

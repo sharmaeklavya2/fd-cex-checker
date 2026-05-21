@@ -85,7 +85,7 @@ def aps(v: Valuation, b: Rational | float, subsets: Sequence[frozenset[int]] | N
     all_values = sorted({v(S) for S in _subsets}, reverse=True)
     # TODO: speed this up by using binary search instead
     for z in all_values:
-        if aps_ge(v, b, z, subsets):
+        if aps_ge(v, b, z, _subsets):
             return z
     raise ValueError(f"Could not compute APS")
     # the above error should never happen if subsets is None
