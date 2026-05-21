@@ -39,3 +39,17 @@ def all_subsets(m: int) -> list[frozenset[int]]:
         for r in range(m + 1)
         for S in itertools.combinations(items, r)
     ]
+
+
+def and_notions(checks: Iterable[AgentCheck]) -> AgentCheck:
+    """Return a check that holds iff all of the given checks hold."""
+    def combined(instance: Instance, allocation: Allocation, i: int) -> bool:
+        return all(check(instance, allocation, i) for check in checks)
+    return combined
+
+
+def or_notions(checks: Iterable[AgentCheck]) -> AgentCheck:
+    """Return a check that holds iff at least one of the given checks holds."""
+    def combined(instance: Instance, allocation: Allocation, i: int) -> bool:
+        return any(check(instance, allocation, i) for check in checks)
+    return combined
