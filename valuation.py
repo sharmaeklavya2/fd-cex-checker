@@ -30,15 +30,15 @@ class Valuation(ABC):
     def __call__(self, subset: Set[int]) -> Rational:
         return self.value(subset)
 
-    def marginal_gain(self, g: int, S: Set[int]) -> Rational:
-        """Marginal gain of adding `g` to `S`. g must not be in S."""
-        assert g not in S
-        return self.value(S | {g}) - self.value(S)
+    def marginal_gain(self, X: Set[int], S: Set[int]) -> Rational:
+        """Marginal gain of adding `X` to `S`. X and S must be disjoint."""
+        assert S.isdisjoint(X)
+        return self.value(S | X) - self.value(S)
 
-    def marginal_loss(self, g: int, S: Set[int]) -> Rational:
-        """Marginal loss of removing `g` from `S`. g must be in S."""
-        assert g in S
-        return self.value(S) - self.value(S - {g})
+    def marginal_loss(self, X: Set[int], S: Set[int]) -> Rational:
+        """Marginal loss of removing `X` from `S`. X must be a subset of S."""
+        assert X <= S
+        return self.value(S) - self.value(S - X)
 
     @abstractmethod
     def func_types(self) -> frozenset[str]:
@@ -105,13 +105,11 @@ class AdditiveValuation(Valuation):
     def value(self, subset: Set[int]) -> Rational:
         return sum(self._values[i] for i in subset)  # sum of empty sequence is 0
 
-    def marginal_gain(self, g: int, S: Set[int]) -> Rational:
-        assert g not in S
-        return self._values[g]
+    def marginal_gain(self, X: Set[int], S: Set[int]) -> Rational:
+        return self.value(X)
 
-    def marginal_loss(self, g: int, S: Set[int]) -> Rational:
-        assert g in S
-        return self._values[g]
+    def marginal_loss(self, X: Set[int], S: Set[int]) -> Rational:
+        return self.value(X)
 
     def func_types(self) -> frozenset[str]:
         return self._func_types

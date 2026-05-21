@@ -14,7 +14,7 @@ from notions.utils import max0
 
 def max_disutil_of_some_chore(v: Valuation, S: frozenset[int]) -> Rational:
     """Returns the maximum disutility across chores in S (0 if S has no chores)."""
-    return max0(-v.marginal_loss(c, S) for c in S)
+    return max0(-v.marginal_loss({c}, S) for c in S)
 
 
 def is_ef1_to(instance: Instance, allocation: Allocation, i: int) -> bool:
@@ -43,7 +43,7 @@ def is_ef1_to(instance: Instance, allocation: Allocation, i: int) -> bool:
 
         # Condition 2: no envy up to a good
         if A_j:
-            v_other_worse = v_other - max0(v.marginal_loss(g, A_j) for g in A_j)
+            v_other_worse = v_other - max0(v.marginal_loss({g}, A_j) for g in A_j)
             if Fraction(v_own, w[i]) >= Fraction(v_other_worse, w[j]):
                 continue
 
@@ -74,5 +74,5 @@ def is_prop1_to(instance: Instance, allocation: Allocation, i: int) -> bool:
         return True
 
     outside = instance.all_items() - A_i
-    v_own_plus_g = v_own + max0(v.marginal_gain(g, A_i) for g in outside)
+    v_own_plus_g = v_own + max0(v.marginal_gain({g}, A_i) for g in outside)
     return v_own_plus_g > PROP
