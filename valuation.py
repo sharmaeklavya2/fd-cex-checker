@@ -31,12 +31,12 @@ class Valuation(ABC):
         return self.value(subset)
 
     def marginal_gain(self, X: Set[int], S: Set[int]) -> Rational:
-        """Marginal gain of adding `X` to `S`. X and S must be disjoint."""
+        """Marginal gain of adding `X` to `S`. v(X given S). X and S must be disjoint."""
         assert S.isdisjoint(X)
         return self.value(S | X) - self.value(S)
 
     def marginal_loss(self, X: Set[int], S: Set[int]) -> Rational:
-        """Marginal loss of removing `X` from `S`. X must be a subset of S."""
+        """Marginal loss of removing `X` from `S`. V(X given S-X). X must be a subset of S."""
         assert X <= S
         return self.value(S) - self.value(S - X)
 
