@@ -20,6 +20,8 @@ from notions.basic import is_ef_to, is_prop_to, is_mms_to
 from notions.aps import is_aps_to
 from notions.up_to_one import is_ef1_to, is_prop1_to
 from notions.up_to_any import is_efx_to, is_propx_to, is_propm_to, is_propavg_to
+from notions.epistemic import get_epistemic, get_min_fs
+from notions.groupwise import get_groupwise, get_pairwise
 
 
 NOTIONS: dict[str, AgentCheck] = {
@@ -33,6 +35,20 @@ NOTIONS: dict[str, AgentCheck] = {
     'PROPavg': is_propavg_to,
     'MMS':     is_mms_to,
     'APS':     is_aps_to,
+
+    # derived notions
+    'EEF': get_epistemic(is_ef_to),
+    'EEFX': get_epistemic(is_efx_to),
+    'EEF1': get_epistemic(is_ef1_to),
+    'MEFS': get_min_fs(is_ef_to),
+    'MXS': get_min_fs(is_efx_to),
+    'M1S': get_min_fs(is_ef1_to),
+    'GPROP': get_groupwise(is_prop_to),
+    'GAPS': get_groupwise(is_aps_to),
+    'GMMS': get_groupwise(is_mms_to),
+    'PPROP': get_pairwise(is_prop_to),
+    'PAPS': get_pairwise(is_aps_to),
+    'PMMS': get_pairwise(is_mms_to),
 }
 
 
