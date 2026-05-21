@@ -8,7 +8,7 @@ from notions import AgentCheck
 from notions.basic import is_mms_to
 from notions.aps import is_aps_to
 from notions.up_to_one import is_ef1_to, is_prop1_to
-from notions.efx import is_efx_to
+from notions.up_to_any import is_efx_to
 
 import pytest
 

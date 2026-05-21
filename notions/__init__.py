@@ -11,7 +11,7 @@ from allocation import Allocation
 from notions.basic import is_ef_to, is_prop_to, is_mms_to
 from notions.aps import is_aps_to
 from notions.up_to_one import is_ef1_to, is_prop1_to
-from notions.efx import is_efx_to
+from notions.up_to_any import is_efx_to
 
 # Type alias for per-agent fairness checks.
 AgentCheck = Callable[[Instance, Allocation, int], bool]
