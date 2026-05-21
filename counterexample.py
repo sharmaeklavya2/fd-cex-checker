@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from instance import Instance
 from allocation import Allocation
-from notions import is_fair, is_fair_to
+from notions.from_str import is_fair, is_fair_to
 
 
 @dataclass
