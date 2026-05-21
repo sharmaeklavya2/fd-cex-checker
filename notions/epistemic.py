@@ -13,6 +13,7 @@ from typing import Callable, Protocol
 
 from instance import Instance
 from allocation import Allocation
+from notions.utils import all_allocations
 
 AgentCheck = Callable[[Instance, Allocation, int], bool]
 
@@ -61,3 +62,31 @@ def get_epistemic(check: AgentCheck) -> EpistemicAgentCheck:
             return any(check(instance, B, i) for B in get_reallocations(allocation, i))
 
     return epistemic_check
+
+
+def get_min_fs(check: AgentCheck) -> EpistemicAgentCheck:
+    """
+    Return the min-share variant of a per-agent fairness check.
+
+    The returned function returns True iff there exists a certificate
+    allocation B with v_i(B_i) ≥ v_i(A_i) such that check(instance, B, i) is True.
+    It enumerates all ways to distribute M \\ A_i among the other agents.
+    """
+    def min_fs_check(instance: Instance, allocation: Allocation, i: int, cert: Allocation | None = None) -> bool:
+        v = instance.valuations[0]
+        v_own = v(allocation.bundle(i))
+        if cert is not None:
+            if v(cert.bundle(i)) > v_own:
+                raise ValueError("Invalid minfs certificate: bundle gained value")
+            elif check(instance, cert, i):
+                return True
+            else:
+                raise ValueError("Invalid minfs certificate: unfair")
+        else:
+            n, m = allocation.n_agents(), allocation.n_items()
+            for B in all_allocations(n, m):
+                if v(B.bundle(i)) <= v_own and check(instance, B, i):
+                    return True
+            return False
+
+    return min_fs_check

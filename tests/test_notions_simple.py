@@ -9,7 +9,7 @@ from notions.basic import is_mms_to
 from notions.aps import is_aps_to
 from notions.up_to_one import is_ef1_to, is_prop1_to
 from notions.up_to_any import is_efx_to, is_propx_to, is_propavg_to, is_propm_to
-from notions.epistemic import get_epistemic
+from notions.epistemic import get_epistemic, get_min_fs
 
 import pytest
 
@@ -94,7 +94,8 @@ def test_aids_typhoid_flu_strong(f: AgentCheck) -> None:
 
 APPROX_SHAREY_NOTIONS = [is_mms_to, is_aps_to,
     is_prop1_to, is_propx_to, is_propavg_to, is_propm_to,
-    get_epistemic(is_ef1_to), get_epistemic(is_efx_to)]
+    get_epistemic(is_ef1_to), get_epistemic(is_efx_to),
+    get_min_fs(is_ef1_to), get_min_fs(is_efx_to)]
 
 def get_myob_alloc(t: int, n: int) -> tuple[Instance, Allocation, Allocation]:
     assert t != 0
@@ -127,5 +128,7 @@ def test_myob_sharey(t: int, f: AgentCheck) -> None:
 def test_myob_non_sharey(t: int, f: AgentCheck) -> None:
     I, A, cert = get_myob_alloc(t, 3)
     fe = get_epistemic(f)
+    fms = get_min_fs(f)
     assert not f(I, A, 0)
     assert fe(I, A, 0, cert)
+    assert fms(I, A, 0, cert)
