@@ -11,7 +11,7 @@ from __future__ import annotations
 import itertools
 from collections.abc import Sequence, Set
 
-from valuation import Valuation, Rational
+from valuation import AdditiveValuation, Valuation, Rational
 from instance import Instance
 from allocation import Allocation
 from notions.utils import AgentCheck
@@ -57,6 +57,19 @@ class RestrictedValuation(Valuation):
     def is_k_val(self, k: int) -> bool:
         raise NotImplementedError(f"{type(self).__name__}: `is_k_val` is not implemented")
 
+    def marginal_gain(self, X: Set[int], S: Set[int]) -> Rational:
+        """Marginal gain of adding `X` to `S`. v(X given S). X and S must be disjoint."""
+        if isinstance(self._base, AdditiveValuation):
+            return self.value(X)
+        else:
+            return super().marginal_gain(X, S)
+
+    def marginal_loss(self, X: Set[int], S: Set[int]) -> Rational:
+        """Marginal loss of removing `X` from `S`. V(X given S-X). X must be a subset of S."""
+        if isinstance(self._base, AdditiveValuation):
+            return self.value(X)
+        else:
+            return super().marginal_loss(X, S)
 
 # ---------------------------------------------------------------------------
 # Restricted instance/allocation
