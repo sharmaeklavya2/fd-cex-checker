@@ -30,7 +30,7 @@ class RestrictedValuation(Valuation):
         item_map: item_map[k] is the original item index for new item k.
     """
 
-    def __init__(self, base: Valuation, item_map: list[int]) -> None:
+    def __init__(self, base: Valuation, item_map: Sequence[int]) -> None:
         self._base = base
         self._item_map = item_map
         self._m = len(item_map)
@@ -57,19 +57,14 @@ class RestrictedValuation(Valuation):
     def is_k_val(self, k: int) -> bool:
         raise NotImplementedError(f"{type(self).__name__}: `is_k_val` is not implemented")
 
-    def marginal_gain(self, X: Set[int], S: Set[int]) -> Rational:
-        """Marginal gain of adding `X` to `S`. v(X given S). X and S must be disjoint."""
-        if isinstance(self._base, AdditiveValuation):
-            return self.value(X)
-        else:
-            return super().marginal_gain(X, S)
 
-    def marginal_loss(self, X: Set[int], S: Set[int]) -> Rational:
-        """Marginal loss of removing `X` from `S`. V(X given S-X). X must be a subset of S."""
-        if isinstance(self._base, AdditiveValuation):
-            return self.value(X)
-        else:
-            return super().marginal_loss(X, S)
+def get_restricted_valuation(v: Valuation, item_map: Sequence[int]) -> Valuation:
+    if isinstance(v, AdditiveValuation):
+        values = v.value_list()
+        return AdditiveValuation([values[g] for g in item_map])
+    else:
+        return RestrictedValuation(v, item_map)
+
 
 # ---------------------------------------------------------------------------
 # Restricted instance/allocation
@@ -96,7 +91,7 @@ def get_restricted_alloc(instance: Instance, allocation: Allocation, agents: Seq
     item_inv = {orig: new for new, orig in enumerate(item_map)}
 
     # Build restricted instance
-    new_valuations = [RestrictedValuation(instance.valuations[j], item_map) for j in agents]
+    new_valuations = [get_restricted_valuation(instance.valuations[j], item_map) for j in agents]
     new_weights = [instance.weights[j] for j in agents]
     new_instance = Instance(new_valuations, new_weights)
 
