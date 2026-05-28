@@ -212,6 +212,7 @@ for t, witness, label in [(1, 2, 'goods'), (-1, 1, 'chores')]:
         violates   = 'APS',
     )
     # COUNTEREXAMPLES.append(_cex)
+    # TODO: improve MMS check
 
 # PMMS does not imply MMS.
 # v=[6t,4t,3t,3t,2t,2t,t], alloc=({0},{2,3,4},{1,5,6}).
@@ -267,6 +268,7 @@ _cex_propm_mixed_manna = Counterexample(
     violates   = 'PROPm',
 )
 # COUNTEREXAMPLES.append(_cex_propm_mixed_manna)
+# TODO: implement PROPm for mixed manna
 
 # PROPm does not imply PROPavg.
 # 3 agents, 3 goods. v=[60,60,30]. alloc=({2},{0,1},∅).
@@ -294,4 +296,132 @@ COUNTEREXAMPLES.append(Counterexample(
     witness    = 0,
     satisfies  = 'MEFS',
     violates   = 'EEF1',
+))
+
+#=[ Unequal Entitlements ]======================================================
+
+# PROP1 does not imply M1S (n=2).
+# 2 agents, 2 items of value t. Weights (2, 1) ≡ (2/3, 1/3). Agent 0 gets both items.
+# Goods: agent 1 gets nothing; every EF1 gives them ≥1. Chores: agent 0 gets all; every EF1 gives them ≥−1.
+for t, witness, label in [(1, 1, 'goods'), (-1, 0, 'chores')]:
+    v = AdditiveValuation([t, t])
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:prop1-not-m1s-n2:' + label,
+        instance   = Instance([v, v], weights=[2, 1]),
+        allocation = Allocation(bundles=[{0, 1}, set()]),
+        witness    = witness,
+        satisfies  = 'PROP1',
+        violates   = 'M1S',
+    ))
+
+# GAPS does not imply PROPx (n=2, unequal entitlements).
+# 2 agents, 12 items: first 2 have value 10t, rest have value t. Weights (2, 3) ≡ (0.4, 0.6).
+# Alloc=({0}, {1,...,11}).
+# Goods: agent 0 gets 10 < PROP_0=12. Chores: agent 1 gets −20 < PROP_1=−18.
+for t, witness, label in [(1, 0, 'goods'), (-1, 1, 'chores')]:
+    v = AdditiveValuation([10*t, 10*t] + [t] * 10)
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:gaps-not-propx-n2:' + label,
+        instance   = Instance([v, v], weights=[2, 3]),
+        allocation = Allocation(bundles=[{0}, set(range(1, 12))]),
+        witness    = witness,
+        satisfies  = 'GAPS',
+        violates   = 'PROPx',
+    ))
+
+# cex:ef1-not-efx-mixed-ue: not appended — EFX for mixed manna is not yet implemented in the checker.
+# 2 agents, 5 items: v=[1,1,1,1,−1]. Weights (4, 1) ≡ (4/5, 1/5).
+# Alloc=({1,2,3,4},{0}). Witness=1.
+v = AdditiveValuation([1, 1, 1, 1, -1])
+_cex_ef1_not_efx_mixed_ue = Counterexample(
+    id         = 'cex:ef1-not-efx-mixed-ue',
+    instance   = Instance([v, v], weights=[4, 1]),
+    allocation = Allocation(bundles=[{1, 2, 3, 4}, {0}]),
+    witness    = 1,
+    satisfies  = 'EF1',
+    violates   = 'EFX',
+)
+# COUNTEREXAMPLES.append(_cex_ef1_not_efx_mixed_ue)
+# TODO: implement EFX for mixed manna
+
+# WMMS and M1S are incompatible for chores.
+# 2 agents, 2 chores: v=[−1,−1]. Weights (9, 1) ≡ (0.9, 0.1).
+v = AdditiveValuation([-1, -1])
+
+# MMS (=WMMS) does not imply M1S.
+# WMMS alloc: ({0,1},∅). Agent 0 gets −2 but every EF1 gives them ≥−1. Witness=0.
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:wmms-plus-m1s-chores:mms-not-m1s',
+    instance   = Instance([v, v], weights=[9, 1]),
+    allocation = Allocation(bundles=[{0, 1}, set()]),
+    witness    = 0,
+    satisfies  = 'MMS',
+    violates   = 'M1S',
+))
+
+# EFX (=M1S) does not imply MMS.
+# EFX alloc: ({0},{1}). Agent 1 gets −1 < WMMS_1=−2/9. Witness=1.
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:wmms-plus-m1s-chores:efx-not-mms',
+    instance   = Instance([v, v], weights=[9, 1]),
+    allocation = Allocation(bundles=[{0}, {1}]),
+    witness    = 1,
+    satisfies  = 'EFX',
+    violates   = 'MMS',
+))
+
+# GMMS does not imply PROP1 for goods with unequal entitlements.
+# 3 agents, 7 unit goods. Weights (14, 5, 5) ≡ (7/12, 5/24, 5/24).
+# GMMS/EFX/M1S allocations have cardinality (3,2,2).
+# APS_0=4; agent 0 gets 3 < 4. Not PROP1. Witness=0.
+v = AdditiveValuation([1] * 7)
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:prop1-plus-m1s-ue',
+    instance   = Instance([v] * 3, weights=[14, 5, 5]),
+    allocation = Allocation(bundles=[{0, 1, 2}, {3, 4}, {5, 6}]),
+    witness    = 0,
+    satisfies  = 'GMMS',
+    violates   = 'PROP1',
+))
+
+# GMMS does not imply PROP1 for chores with unequal entitlements.
+# 3 agents, 7 unit chores. Weights (18, 7, 7) ≡ (9/16, 7/32, 7/32).
+# GWMMS allocations have cardinality (5,1,1). APS_0=−4; agent 0 gets −5. Not PROP1. Witness=0.
+v = AdditiveValuation([-1] * 7)
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:gwmms-nimpl-prop1-m1s-ue-chores',
+    instance   = Instance([v] * 3, weights=[18, 7, 7]),
+    allocation = Allocation(bundles=[{0, 1, 2, 3, 4}, {5}, {6}]),
+    witness    = 0,
+    satisfies  = 'GMMS',
+    violates   = 'PROP1',
+))
+
+# PROP does not imply M1S for chores with unequal entitlements.
+# 3 agents, 7 chores. Weights (8, 3, 3) ≡ (4/7, 3/14, 3/14).
+# v_0=[−1]*7. v_1=v_2=[−1,−1,−1,−1,−ε,−ε,−ε]. A_0={0,1,2,3}, A_1={4,5,6}, A_2=∅. Witness=0.
+_v0_pnm = AdditiveValuation([-1] * 7)
+_alloc_pnm = Allocation(bundles=[{0, 1, 2, 3}, {4, 5, 6}, set()])
+_weights_pnm = [8, 3, 3]
+
+# negBinary: ε=0 → v_1=v_2=[−1,−1,−1,−1,0,0,0]
+_v12_negbin = AdditiveValuation([-1, -1, -1, -1, 0, 0, 0])
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:prop-not-m1s-chores:negBinary',
+    instance   = Instance([_v0_pnm, _v12_negbin, _v12_negbin], weights=_weights_pnm),
+    allocation = _alloc_pnm,
+    witness    = 0,
+    satisfies  = 'PROP',
+    violates   = 'M1S',
+))
+
+# negative-bival: ε=1/7 → v_1=v_2=[−1,−1,−1,−1,−1/7,−1/7,−1/7]
+_v12_negbiv = AdditiveValuation([-1, -1, -1, -1, Fraction(-1, 7), Fraction(-1, 7), Fraction(-1, 7)])
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:prop-not-m1s-chores:negative-bival',
+    instance   = Instance([_v0_pnm, _v12_negbiv, _v12_negbiv], weights=_weights_pnm),
+    allocation = _alloc_pnm,
+    witness    = 0,
+    satisfies  = 'PROP',
+    violates   = 'M1S',
 ))
