@@ -7,7 +7,7 @@ Each counterexample proves a non-implication of the form "F1 does not imply F2":
 it is a fair division instance and an allocation that satisfies F1 for every agent,
 together with a witness agent who does not satisfy F2.
 
-## File overview
+## Files Overview
 
 | File | Purpose |
 |---|---|
@@ -25,19 +25,15 @@ together with a witness agent who does not satisfy F2.
 
 Verify a collection of counterexamples:
 
-    python check.py <counterexamples.py>
+    python check.py simple_cexs.py
 
 Also cross-check against a cpigjs-format JSON spec:
 
-    python check.py <counterexamples.py> --cpigjs-json <spec.json>
-
-Skip the mathematical verification (JSON cross-check only):
-
-    python check.py <counterexamples.py> --cpigjs-json <spec.json> --no-verify
+    python check.py simple_cexs.py --cpigjs-json simple_cexs.json
 
 Exits with code 0 if everything passes, 1 otherwise. All output goes to stderr.
 
-## Adding counterexamples
+## Adding Counterexamples
 
 Create or extend a Python file that exposes a module-level list:
 
@@ -57,8 +53,7 @@ Each entry is a `Counterexample` with the following fields:
 | `violates` | `str` | Fairness notion violated by `witness` |
 
 Notion names match the cpigjs JSON spec (`'EF'`, `'PROP'`, `'MMS'`, …).
-Composite notions are supported: `'EF1+PROP'` (conjunction), `'EF1|MMS'`
-(disjunction).
+Composite notions are supported: `'EF1+PROP'` (conjunction), `'EF1|MMS'` (disjunction).
 
 See `simple_cexs.py` for worked examples.
 
