@@ -129,3 +129,21 @@ class AdditiveValuation(Valuation):
 
     def __repr__(self) -> str:
         return f"AdditiveValuation({self._values!r})"
+
+    def __pos__(self) -> AdditiveValuation:
+        return self
+
+    def __neg__(self) -> AdditiveValuation:
+        return AdditiveValuation([-x for x in self._values])
+
+    def __mul__(self, c: object) -> AdditiveValuation:
+        if isinstance(c, Rational):
+            return AdditiveValuation([x*c for x in self._values])
+        else:
+            return NotImplemented
+
+    def __rmul__(self, c: object) -> AdditiveValuation:
+        if isinstance(c, Rational):
+            return AdditiveValuation([x*c for x in self._values])
+        else:
+            return NotImplemented
