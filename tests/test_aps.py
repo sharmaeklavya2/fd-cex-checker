@@ -10,7 +10,7 @@ from notions.utils import all_subsets
 from instance import Instance
 from allocation import Allocation
 from notions.aps import aps_instance, is_aps_to, aps_ge
-from notions.basic import wmms
+from notions.mms import wmms
 
 
 # ---------------------------------------------------------------------------
