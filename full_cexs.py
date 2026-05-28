@@ -203,16 +203,14 @@ _v_gmms = [65, 31, 31, 31, 23, 23, 23, 17, 11, 7, 7, 7, 5, 5, 5]
 _alloc_gmms = Allocation(bundles=[{0,8,9,10,11}, {1,2,3,14}, {4,5,6,7,12,13}])
 for t, witness, label in [(1, 2, 'goods'), (-1, 1, 'chores')]:
     v = t * AdditiveValuation(_v_gmms)
-    _cex = Counterexample(
+    COUNTEREXAMPLES.append(Counterexample(
         id         = 'cex:gmms-not-aps:' + label,
         instance   = Instance([v] * 3),
         allocation = _alloc_gmms,
         witness    = witness,
         satisfies  = 'GMMS',
         violates   = 'APS',
-    )
-    # COUNTEREXAMPLES.append(_cex)
-    # TODO: improve MMS check
+    ))
 
 # PMMS does not imply MMS.
 # v=[6t,4t,3t,3t,2t,2t,t], alloc=({0},{2,3,4},{1,5,6}).
