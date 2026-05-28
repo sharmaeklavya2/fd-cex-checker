@@ -99,6 +99,9 @@ class AdditiveValuation(Valuation):
             (min(self._values), max(self._values)) if self._values else (0, 0)
         )
 
+    def value_list(self) -> Sequence[Rational]:
+        return self._values
+
     def n_items(self) -> int:
         return len(self._values)
 
