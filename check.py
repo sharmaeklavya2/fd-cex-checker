@@ -59,16 +59,16 @@ def match_cex(cex_spec: dict[str, object], cex: Counterexample) -> list[str]:
 
 def match_json_file(fpath: Path, cexs_dict: Mapping[str, Counterexample]) -> int:
     with open(fpath) as fp:
-        cexs_spec_list = json.load(fp)['counterexamples']
+        cexs_spec_list = json.load(fp)['counterExamples']
     cexs_spec_ids = set()
     n_ignored, n_not_found, n_failed, n_matched = 0, 0, 0, 0
     for cex_spec in cexs_spec_list:
-        if 'id' not in cex_spec:
+        idStr = cex_spec.get('id', cex_spec.get('texRef'))
+        if not isinstance(idStr, str):
             n_ignored += 1
-        elif cex_spec['id'] in cexs_spec_ids:
-            raise Exception(f"duplicate id {cex_spec['id']} in JSON file")
+        elif idStr in cexs_spec_ids:
+            raise Exception(f"duplicate id {idStr} in JSON file")
         else:
-            idStr = cex_spec['id']
             cexs_spec_ids.add(idStr)
             cex = cexs_dict.get(idStr)
             if cex is None:

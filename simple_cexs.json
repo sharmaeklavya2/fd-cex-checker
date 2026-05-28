@@ -1,4 +1,4 @@
-{"counterexamples": [
+{"counterExamples": [
     {
         "satisfies": "MMS", "butNot": "PROP",
         "id": "mms-not-prop-1",
