@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import Generic, TypeVar
 from collections.abc import Hashable, Mapping, Sequence, Set
 from collections import Counter
 
@@ -8,7 +8,7 @@ from .base import ADD_FTYPES, SUBMOD_FTYPES, SI_FTYPES
 
 T = TypeVar('T', bound=Hashable)
 
-class PmrfValuation[T](Valuation):
+class PmrfValuation(Valuation, Generic[T]):
     """
     Partition Matroid Rank Function Valuation.
 
