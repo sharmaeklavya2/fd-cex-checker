@@ -12,3 +12,4 @@ from .additive import AdditiveValuation
 from .unit_demand import UnitDemandValuation
 from .pmrf import PmrfValuation
 from .general import GeneralValuation
+from .bin_pack import BinPackingValuation
