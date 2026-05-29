@@ -1,6 +1,6 @@
 from fractions import Fraction
 
-from valuation import AdditiveValuation, UnitDemandValuation
+from valuation import AdditiveValuation, UnitDemandValuation, PmrfValuation
 from instance import Instance
 from allocation import Allocation
 from counterexample import Counterexample
@@ -499,4 +499,88 @@ COUNTEREXAMPLES.append(Counterexample(
     witness    = 2,
     satisfies  = 'PROPm',
     violates   = 'PROPavg',
+))
+
+#=[ PMRF Valuations (Partition Matroid Rank Functions) ]========================
+# PmrfValuation(colors, default_cap=1, shift=eps) implements PMRF_{+eps}(P),
+# where P is the partition induced by the color labels.
+# Marginals are in {eps, 1+eps}: binary when eps=0, positive-bival when eps>0.
+
+# EF does not imply MMS (PMRF).
+# P = ({r1,r2}, {g1,g2}): items r1=0,r2=1,g1=2,g2=3, colors=[0,0,1,1].
+# Allocation = P itself = ({0,1},{2,3}). Each bundle has 1 color → PMRF=1+2eps. EF holds.
+# MMS: partition ({0,2},{1,3}) gives PMRF=2+2eps each. Witness=0 (1+2eps < 2+2eps).
+for shift, id_suffix in [(0, 'binary'), (1, 'positive-bival')]:
+    v = PmrfValuation([0, 0, 1, 1], default_cap=1, shift=shift)
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:ef-not-mms-pmrf:' + id_suffix,
+        instance   = Instance([v, v]),
+        allocation = Allocation(bundles=[{0, 1}, {2, 3}]),
+        witness    = 0,
+        satisfies  = 'EF',
+        violates   = 'MMS',
+    ))
+
+# EF1 does not imply MXS (PMRF).
+# P = ({r1,r2},{g1,g2},{b}): items r1=0,r2=1,g1=2,g2=3,b=4. colors=[0,0,1,1,2]. eps=0.
+# A = ({0,1},{2,3,4}). Agent 0: PMRF=1. Agent 1: PMRF=2.
+# EF1 ✓: remove b(4) from A_1 → {2,3}: PMRF=1 = agent 0. Witness=0 (MXS violated).
+v = PmrfValuation([0, 0, 1, 1, 2], default_cap=1)
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:ef1-not-mxs-pmrf',
+    instance   = Instance([v, v]),
+    allocation = Allocation(bundles=[{0, 1}, {2, 3, 4}]),
+    witness    = 0,
+    satisfies  = 'EF1',
+    violates   = 'MXS',
+))
+
+# MEFS does not imply EF1 (PMRF).
+# P = ({a},{b},{c},{d},{e1,e2},{f1,f2},{g1,g2}): 10 items, colors=[0,1,2,3,4,4,5,5,6,6].
+# A = ({a,e1,f1,g1},{b,c,d,e2,f2,g2}) = ({0,4,6,8},{1,2,3,5,7,9}). shift=eps (0 ≤ eps ≤ 1/2).
+# v(A_0)=4+4eps, v(A_1)=6+6eps. Witness=0: even removing best item from A_1 leaves 5+5eps > 4+4eps.
+# MEFS cert B=({0,1,2,3},{4,5,6,7,8,9}): v(B_0)=4+4eps=v(A_0), v(B_1)=3+6eps < 4+4eps for eps<1/2.
+for shift, id_suffix in [(0, 'binary'), (Fraction(1, 2), 'positive-bival')]:
+    v = PmrfValuation([0, 1, 2, 3, 4, 4, 5, 5, 6, 6], default_cap=1, shift=shift)
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:mefs-not-ef1-pmrf:' + id_suffix,
+        instance   = Instance([v, v]),
+        allocation = Allocation(bundles=[{0, 4, 6, 8}, {1, 2, 3, 5, 7, 9}]),
+        witness    = 0,
+        satisfies  = 'MEFS',
+        violates   = 'EF1',
+    ))
+
+# EEF does not imply EF1 or PPROP (PMRF).
+# M = {a_j}_{j=1}^6 ∪ {b_j}_{j=1}^6 ∪ {c_j}_{j=1}^4 (16 items). shift=eps (0 ≤ eps < 1/6).
+# Parts: {a_j,b_j} for j∈[6] (each pair is one color) and {c_j} for j∈[4] (singletons).
+# a_j = j-1, b_j = j+5, c_j = j+11. Colors: a_j and b_j share color j-1; c_j has color j+5.
+# A = ({a_j},{b_j},{c_j}) = ({0..5},{6..11},{12..15}).
+# v(A_0)=v(A_1)=6+6eps, v(A_2)=4+4eps. Witness=2: not EF1 (4+4eps < 5+5eps after removal).
+# EEF cert for agent 2: B_1={0,1,2,6,7,8}, B_2={3,4,5,9,10,11}. v(B_1)=v(B_2)=3+6eps < 4+4eps.
+_colors_eef_pmrf = [0,1,2,3,4,5, 0,1,2,3,4,5, 6,7,8,9]
+for shift, id_suffix in [(0, 'binary'), (Fraction(1, 12), 'positive-bival')]:
+    v = PmrfValuation(_colors_eef_pmrf, default_cap=1, shift=shift)
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:eef-not-ef1-pprop-pmrf:' + id_suffix,
+        instance   = Instance([v] * 3),
+        allocation = Allocation(bundles=[set(range(6)), set(range(6, 12)), set(range(12, 16))]),
+        witness    = 2,
+        satisfies  = 'EEF',
+        violates   = 'EF1|PPROP',
+    ))
+
+# PROP does not imply M1S (uniform matroid rank function).
+# v(X) = min(6, |X|): uniform matroid of rank 6 over 10 items. Binary marginals (eps=0).
+# Implemented as PmrfValuation with one color (cap=6): all items same color, cap 6.
+# A = ({0,...,3},{4,...,9}). v(A_0)=4, v(A_1)=6. PROP=min(6,10)/2=3. Both satisfy PROP.
+# Witness=0: M1S certificate must give agent 0 value ≥ 4, but every EF1 allocation gives ≤ ...
+v = PmrfValuation([0] * 10, caps={0: 6})
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:prop-not-m1s-uniform-matroid:binary',
+    instance   = Instance([v, v]),
+    allocation = Allocation(bundles=[set(range(4)), set(range(4, 10))]),
+    witness    = 0,
+    satisfies  = 'PROP',
+    violates   = 'M1S',
 ))
