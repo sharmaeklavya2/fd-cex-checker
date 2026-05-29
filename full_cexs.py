@@ -1,6 +1,6 @@
 from fractions import Fraction
 
-from valuation import AdditiveValuation
+from valuation import AdditiveValuation, UnitDemandValuation
 from instance import Instance
 from allocation import Allocation
 from counterexample import Counterexample
@@ -186,15 +186,18 @@ for t, witness, label in [(1, 0, 'goods'), (-1, 1, 'chores')]:
 
 # GAPS does not imply PROPx.
 # 3 agents, 2 goods [50, 10]. Agent 0 gets good 0, agent 1 gets good 1, agent 2 gets nothing.
-v = AdditiveValuation([50, 10])
-COUNTEREXAMPLES.append(Counterexample(
-    id         = 'cex:gaps-not-propx:additive',
-    instance   = Instance([v] * 3),
-    allocation = Allocation(bundles=[{0}, {1}, set()]),
-    witness    = 2,
-    satisfies  = 'GAPS',
-    violates   = 'PROPx',
-))
+# Works for both additive and unit-demand valuations.
+_alloc_gaps_not_propx = Allocation(bundles=[{0}, {1}, set()])
+for Val, id_suffix in [(AdditiveValuation, 'additive'), (UnitDemandValuation, 'unit-demand')]:
+    v = Val([50, 10])
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:gaps-not-propx:' + id_suffix,
+        instance   = Instance([v] * 3),
+        allocation = _alloc_gaps_not_propx,
+        witness    = 2,
+        satisfies  = 'GAPS',
+        violates   = 'PROPx',
+    ))
 
 # GMMS does not imply APS.
 # 3 agents, 15 items. Leximin allocation: bundles sum to (97, 98, 96).
@@ -422,4 +425,78 @@ COUNTEREXAMPLES.append(Counterexample(
     witness    = 0,
     satisfies  = 'PROP',
     violates   = 'M1S',
+))
+
+#=[ Unit-Demand Valuations ]====================================================
+
+# PROP does not imply M1S (unit-demand).
+# v over 3 goods: v[0]=v[1]=4, v[2]=3. vhat(X) = v(X) + 2ε|X|, so shift = 2ε.
+# 2 agents, alloc=({0,1},{2}). Witness=1 (EF1-satisfaction fails in every M1S certificate).
+# nonneg: ε=0, shift=0. positive: ε=1/12 (< 1/6), shift=1/6.
+for shift, id_suffix in [(0, 'nonneg'), (Fraction(1, 8), 'positive')]:
+    v = UnitDemandValuation([4, 4, 3], shift=shift)
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:prop-not-m1s-unit-demand:' + id_suffix,
+        instance   = Instance([v, v]),
+        allocation = Allocation(bundles=[{0, 1}, {2}]),
+        witness    = 1,
+        satisfies  = 'PROP',
+        violates   = 'M1S',
+    ))
+
+# PROP1 does not imply PROPm (unit-demand).
+# v over 2 goods: v[0]=30, v[1]=10. 2 agents, alloc=({0,1},∅). Witness=1.
+# Agent 1 gets nothing. PROP1 holds (adding item 0 gives 30 > 15 = PROP).
+# PROPm fails: min claimable gain from agent 0's bundle is v[1]=10, and 10 < 15 = PROP.
+v = UnitDemandValuation([30, 10])
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:ud:prop1-not-propm',
+    instance   = Instance([v, v]),
+    allocation = Allocation(bundles=[{0, 1}, set()]),
+    witness    = 1,
+    satisfies  = 'PROP1',
+    violates   = 'PROPm',
+))
+
+# PROP does not imply PPROP (unit-demand).
+# v over 3 goods: v[0]=30, v[1]=v[2]=11. 3 agents, alloc=({0},{1},{2}). Witness=1.
+# All agents satisfy PROP (PROP share = 30/3 = 10; each gets ≥10).
+# Agent 1 fails PPROP: in the 2-agent sub-instance with items {0,1}, agent 1 gets 11 < max(30,11)/2 = 15.
+v = UnitDemandValuation([30, 11, 11])
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:ud:prop-not-pprop',
+    instance   = Instance([v] * 3),
+    allocation = Allocation(bundles=[{0}, {1}, {2}]),
+    witness    = 1,
+    satisfies  = 'PROP',
+    violates   = 'PPROP',
+))
+
+# MMS does not imply EF1 or PROPm (unit-demand).
+# v over 5 goods: v[0]=200, v[1]=30, v[2]=v[3]=v[4]=10. 4 agents. MMS=10.
+# Alloc=({0,1},{2},{3},{4}). Witness=1: gets 10, EF1-envies agent 0 (max(200,30)∖one item = 30 > 10).
+# PROPm also fails: PROP=200/4=50; min claimable gain from agent 0's bundle = 20 < 50.
+v = UnitDemandValuation([200, 30, 10, 10, 10])
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:ud:mms-not-ef1-propm',
+    instance   = Instance([v] * 4),
+    allocation = Allocation(bundles=[{0, 1}, {2}, {3}, {4}]),
+    witness    = 1,
+    satisfies  = 'MMS',
+    violates   = 'EF1|PROPm',
+))
+
+# PROPm does not imply PROPavg (unit-demand).
+# v over 3 goods: v[0]=75, v[1]=30, v[2]=10. 3 agents. PROP share = 75/3 = 25.
+# Alloc=({0,2},{1},∅). Witness=2.
+# PROPm: T=[min(75,10), 30]=[10,30]; max(T)=30 > 25. PROPm holds.
+# PROPavg: avg(T)=20 < 25. PROPavg fails.
+v = UnitDemandValuation([75, 30, 10])
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:ud:propm-not-propavg',
+    instance   = Instance([v] * 3),
+    allocation = Allocation(bundles=[{0, 2}, {1}, set()]),
+    witness    = 2,
+    satisfies  = 'PROPm',
+    violates   = 'PROPavg',
 ))
