@@ -14,7 +14,7 @@ from collections.abc import Sequence, Set
 from valuation import AdditiveValuation, Valuation, Rational
 from instance import Instance
 from allocation import Allocation
-from notions.utils import AgentCheck
+from .utils import AgentCheck
 
 
 # ---------------------------------------------------------------------------

@@ -4,7 +4,7 @@ from collections.abc import Iterable, Sequence, Set
 from valuation import AdditiveValuation, Rational, Valuation
 from instance import Instance
 from allocation import Allocation
-from notions.utils import all_allocations
+from .utils import all_allocations
 
 
 def update_partition_sums(Xset: Set[tuple[Rational, ...]], y: Rational) -> set[tuple[Rational, ...]]:

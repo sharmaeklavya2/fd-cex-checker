@@ -13,7 +13,7 @@ from typing import Protocol
 
 from instance import Instance
 from allocation import Allocation
-from notions.utils import all_allocations, AgentCheck
+from .utils import all_allocations, AgentCheck
 
 class EpistemicAgentCheck(Protocol):
     def __call__(self, instance: Instance, allocation: Allocation, i: int,

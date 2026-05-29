@@ -25,7 +25,7 @@ import numpy as np
 from scipy.optimize import linprog
 
 from valuation import Valuation, Rational
-from notions.utils import all_subsets
+from .utils import all_subsets
 from instance import Instance
 from allocation import Allocation
 

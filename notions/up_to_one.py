@@ -9,7 +9,7 @@ from fractions import Fraction
 from valuation import Valuation, Rational
 from instance import Instance
 from allocation import Allocation
-from notions.utils import max0
+from .utils import max0
 
 
 def max_disutil_of_some_chore(v: Valuation, S: frozenset[int]) -> Rational:

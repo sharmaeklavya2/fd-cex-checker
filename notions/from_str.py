@@ -15,14 +15,14 @@ from __future__ import annotations
 from instance import Instance
 from allocation import Allocation
 
-from notions.utils import AgentCheck, and_notions, or_notions
-from notions.basic import is_ef_to, is_prop_to
-from notions.mms import is_mms_to
-from notions.aps import is_aps_to
-from notions.up_to_one import is_ef1_to, is_prop1_to
-from notions.up_to_any import is_efx_to, is_propx_to, is_propm_to, is_propavg_to
-from notions.epistemic import get_epistemic, get_min_fs
-from notions.groupwise import get_groupwise, get_pairwise
+from .utils import AgentCheck, and_notions, or_notions
+from .basic import is_ef_to, is_prop_to
+from .mms import is_mms_to
+from .aps import is_aps_to
+from .up_to_one import is_ef1_to, is_prop1_to
+from .up_to_any import is_efx_to, is_propx_to, is_propm_to, is_propavg_to
+from .epistemic import get_epistemic, get_min_fs
+from .groupwise import get_groupwise, get_pairwise
 
 
 NOTIONS: dict[str, AgentCheck] = {
