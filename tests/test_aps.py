@@ -4,8 +4,7 @@ from fractions import Fraction
 
 import pytest
 
-from valuation import AdditiveValuation
-from valuation_extra import UnitDemandValuation, GeneralValuation
+from valuation import AdditiveValuation, UnitDemandValuation, GeneralValuation
 from notions.utils import all_subsets
 from instance import Instance
 from allocation import Allocation

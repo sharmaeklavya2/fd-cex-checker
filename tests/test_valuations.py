@@ -1,7 +1,6 @@
 """Tests for properties of valuation functions."""
 
-from valuation import AdditiveValuation
-from valuation_extra import PmrfValuation
+from valuation import AdditiveValuation, PmrfValuation
 
 
 def test_neg():
