@@ -145,3 +145,18 @@ def test_myob_cert(t: int, f: AgentCheck) -> None:
 def test_myob_efy(t: int, f: AgentCheck) -> None:
     I, A, _ = get_myob_alloc(t, 3)
     assert not f(I, A, 0)
+
+#=[ mixed manna ]===============================================================
+
+@pytest.mark.parametrize("t", (1, -1))
+@pytest.mark.parametrize("f", [is_efx_to, is_propx_to, is_propm_to])
+def test_efx_mm(f: AgentCheck, t: int) -> None:
+    v = t * AdditiveValuation([12, 10, -9, -9])
+    I = Instance([v, v])
+    A = Allocation(bundles=[{0,1,2,3}, set()])
+    unlucky = 1 if t == 1 else 0
+    assert not f(I, A, unlucky)
+    assert is_ef1_to(I, A, unlucky)
+    B = Allocation(bundles=[{0,2}, {1,3}])
+    assert f(I, B, unlucky)
+    assert is_ef1_to(I, B, unlucky)
