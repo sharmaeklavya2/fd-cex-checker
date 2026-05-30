@@ -1,6 +1,6 @@
 from fractions import Fraction
 
-from valuation import AdditiveValuation, UnitDemandValuation, PmrfValuation, BinPackingValuation
+from valuation import AdditiveValuation, UnitDemandValuation, PmrfValuation, BinPackingValuation, IdenticalItemsValuation
 from instance import Instance
 from allocation import Allocation
 from counterexample import Counterexample
@@ -658,3 +658,42 @@ _cex_gmms_not_aps_binary_subadd = Counterexample(
 )
 # COUNTEREXAMPLES.append(_cex_gmms_not_aps_binary_subadd)
 # TODO: Can we speed this up?
+
+#=[ Supermodular Valuations ]===================================================
+# cex:ef-not-prop-supmod
+# f(x) = x*eps + max(0, x-k), giving supermodular v(S) = f(|S|).
+# Marginals: eps for |S| < k, 1+eps for |S| >= k (non-decreasing → supermodular).
+# Allocation: each of n agents gets 4 goods.  PROP = f(4n)/n = 4eps + (4n-k)/n * [k<4n].
+
+# n=2, k=5: 8 items.  PROP = 3/2 + 4eps.  f(4)=4eps < PROP.  f(5)=5eps < PROP.
+# No agent can be PROP1 or PROPm satisfied with ≤ 4 items; some agent always gets ≤ 4.
+for eps, id_suffix in [(0, 'n2-binary'), (Fraction(1, 28), 'n2-positive-bival')]:
+    vals = [eps * i + max(0, i - 5) for i in range(9)]
+    v = IdenticalItemsValuation(vals)
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:ef-not-prop-supmod:' + id_suffix,
+        instance   = Instance([v, v]),
+        allocation = Allocation(bundles=[set(range(4)), set(range(4, 8))]),
+        witness    = 0,
+        satisfies  = 'EF+GAPS',
+        violates   = 'PROP1|PROPm',
+    ))
+
+# n=3, k=8: 12 items.  PROP = 4/3 + 4eps.  f(4)=4eps < PROP.
+# A is pairwise PROP (f(8)-f(4)=0 for binary; 4eps for positive-bival → f(4)+4eps=8eps < 4/3).
+# f(5)=5eps < PROP → not PROP1.  f(9)=1+9eps < PROP → not PROPx.
+# If eps=0: v(A_j | A_i) = f(8)-f(4)=0 for all i≠j → PROPavg.
+for eps, id_suffix, satisfies, violates in [
+        (0,              'n3-binary',        'PPROP+PROPavg', 'PROP1|PROPx'),
+        (Fraction(1,28), 'n3-positive-bival','PPROP',         'PROP1'),
+]:
+    vals = [eps * i + max(0, i - 8) for i in range(13)]
+    v = IdenticalItemsValuation(vals)
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:ef-not-prop-supmod:' + id_suffix,
+        instance   = Instance([v] * 3),
+        allocation = Allocation(bundles=[set(range(4)), set(range(4, 8)), set(range(8, 12))]),
+        witness    = 0,
+        satisfies  = satisfies,
+        violates   = violates,
+    ))
