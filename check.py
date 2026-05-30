@@ -96,6 +96,7 @@ def main() -> None:
         help='Do not check correctness of counterexamples.')
     parser.add_argument("--cpigjs-json", type=Path,
         help="JSON file containing a spec of counterexamples. Will be cross-checked with the python file.")
+    parser.add_argument("--id", help="Check only a specific counterexample ID")
     args = parser.parse_args()
 
     # check for duplicate ids in args.file
@@ -113,9 +114,9 @@ def main() -> None:
         exit_status = match_json_file(args.cpigjs_json, cexs_dict)
 
     # verify counterexamples
-    failed = 0
+    failed, passed = 0, 0
     for cex in cexs_list:
-        if args.verify:
+        if args.verify and (args.id is None or args.id == cex.id):
             errors = cex.verify()
             if errors:
                 failed += 1
@@ -123,11 +124,13 @@ def main() -> None:
                       file=sys.stderr)
                 for err in errors:
                     print(f"  - {err}", file=sys.stderr)
+            else:
+                passed += 1
 
     # report cexs verification results
     if args.verify:
-        total = len(cexs_list)
-        passed = total - failed
+        # total = len(cexs_list)
+        total = passed + failed
         print(f"{passed}/{total} counterexamples passed.", file=sys.stderr)
     if failed > 0:
         exit_status = 1
