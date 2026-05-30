@@ -141,7 +141,7 @@ for t, witness, label in [(1, 0, 'goods'), (-1, 1, 'chores')]:
     ))
 
 # PROPx does not imply M1S.
-# eps=1/4, scaled to integers: v=[2t,2t,2t,3t], alloc=({3},{0,1,2}).
+# ε=1/4, scaled to integers: v=[2t,2t,2t,3t], alloc=({3},{0,1,2}).
 # For t=1: agent 0 (witness). For t=-1: agent 1 (witness).
 for t, witness, label in [(1, 0, 'goods'), (-1, 1, 'chores')]:
     v = AdditiveValuation([2*t, 2*t, 2*t, 3*t])
@@ -256,7 +256,7 @@ COUNTEREXAMPLES.append(Counterexample(
 ))
 
 # cex:propm-mixed-manna: not appended — PROPm for mixed manna is not yet implemented in the checker.
-# 3 agents, 5 chores + 1 good. v=[-3,-3,-3,-3,-3,0.75] (eps=1/4 satisfies 0 < eps < 1/2).
+# 3 agents, 5 chores + 1 good. v=[-3,-3,-3,-3,-3,0.75] (ε=1/4 satisfies 0 < ε < 1/2).
 # Case 2 allocation from proof: agent 0 gets 2 chores, agent 1 gets 2 chores + good, agent 2 gets 1 chore.
 # Agent 0 adds the good: -6+0.75=-5.25 < PROP=-4.75. Not PROPm. Witness=0.
 v = AdditiveValuation([-3, -3, -3, -3, -3, Fraction(3, 4)])
@@ -427,6 +427,10 @@ COUNTEREXAMPLES.append(Counterexample(
     violates   = 'M1S',
 ))
 
+#-------------------------------------------------------------------------------
+# Non-Additive Valuations
+#-------------------------------------------------------------------------------
+
 #=[ Unit-Demand Valuations ]====================================================
 
 # PROP does not imply M1S (unit-demand).
@@ -502,14 +506,14 @@ COUNTEREXAMPLES.append(Counterexample(
 ))
 
 #=[ PMRF Valuations (Partition Matroid Rank Functions) ]========================
-# PmrfValuation(colors, default_cap=1, shift=eps) implements PMRF_{+eps}(P),
+# PmrfValuation(colors, default_cap=1, shift=ε) implements PMRF_{+ε}(P),
 # where P is the partition induced by the color labels.
-# Marginals are in {eps, 1+eps}: binary when eps=0, positive-bival when eps>0.
+# Marginals are in {ε, 1+ε}: binary when ε=0, positive-bival when ε>0.
 
 # EF does not imply MMS (PMRF).
 # P = ({r1,r2}, {g1,g2}): items r1=0,r2=1,g1=2,g2=3, colors=[0,0,1,1].
-# Allocation = P itself = ({0,1},{2,3}). Each bundle has 1 color → PMRF=1+2eps. EF holds.
-# MMS: partition ({0,2},{1,3}) gives PMRF=2+2eps each. Witness=0 (1+2eps < 2+2eps).
+# Allocation = P itself = ({0,1},{2,3}). Each bundle has 1 color → PMRF=1+2ε. EF holds.
+# MMS: partition ({0,2},{1,3}) gives PMRF=2+2ε each. Witness=0 (1+2ε < 2+2ε).
 for shift, id_suffix in [(0, 'binary'), (1, 'positive-bival')]:
     v = PmrfValuation([0, 0, 1, 1], default_cap=1, shift=shift)
     COUNTEREXAMPLES.append(Counterexample(
@@ -522,7 +526,7 @@ for shift, id_suffix in [(0, 'binary'), (1, 'positive-bival')]:
     ))
 
 # EF1 does not imply MXS (PMRF).
-# P = ({r1,r2},{g1,g2},{b}): items r1=0,r2=1,g1=2,g2=3,b=4. colors=[0,0,1,1,2]. eps=0.
+# P = ({r1,r2},{g1,g2},{b}): items r1=0,r2=1,g1=2,g2=3,b=4. colors=[0,0,1,1,2]. ε=0.
 # A = ({0,1},{2,3,4}). Agent 0: PMRF=1. Agent 1: PMRF=2.
 # EF1 ✓: remove b(4) from A_1 → {2,3}: PMRF=1 = agent 0. Witness=0 (MXS violated).
 v = PmrfValuation([0, 0, 1, 1, 2], default_cap=1)
@@ -537,9 +541,9 @@ COUNTEREXAMPLES.append(Counterexample(
 
 # MEFS does not imply EF1 (PMRF).
 # P = ({a},{b},{c},{d},{e1,e2},{f1,f2},{g1,g2}): 10 items, colors=[0,1,2,3,4,4,5,5,6,6].
-# A = ({a,e1,f1,g1},{b,c,d,e2,f2,g2}) = ({0,4,6,8},{1,2,3,5,7,9}). shift=eps (0 ≤ eps ≤ 1/2).
-# v(A_0)=4+4eps, v(A_1)=6+6eps. Witness=0: even removing best item from A_1 leaves 5+5eps > 4+4eps.
-# MEFS cert B=({0,1,2,3},{4,5,6,7,8,9}): v(B_0)=4+4eps=v(A_0), v(B_1)=3+6eps < 4+4eps for eps<1/2.
+# A = ({a,e1,f1,g1},{b,c,d,e2,f2,g2}) = ({0,4,6,8},{1,2,3,5,7,9}). shift=ε (0 ≤ ε ≤ 1/2).
+# v(A_0)=4+4ε, v(A_1)=6+6ε. Witness=0: even removing best item from A_1 leaves 5+5ε > 4+4ε.
+# MEFS cert B=({0,1,2,3},{4,5,6,7,8,9}): v(B_0)=4+4ε=v(A_0), v(B_1)=3+6ε < 4+4ε for ε<1/2.
 for shift, id_suffix in [(0, 'binary'), (Fraction(1, 2), 'positive-bival')]:
     v = PmrfValuation([0, 1, 2, 3, 4, 4, 5, 5, 6, 6], default_cap=1, shift=shift)
     COUNTEREXAMPLES.append(Counterexample(
@@ -552,12 +556,12 @@ for shift, id_suffix in [(0, 'binary'), (Fraction(1, 2), 'positive-bival')]:
     ))
 
 # EEF does not imply EF1 or PPROP (PMRF).
-# M = {a_j}_{j=1}^6 ∪ {b_j}_{j=1}^6 ∪ {c_j}_{j=1}^4 (16 items). shift=eps (0 ≤ eps < 1/6).
+# M = {a_j}_{j=1}^6 ∪ {b_j}_{j=1}^6 ∪ {c_j}_{j=1}^4 (16 items). shift=ε (0 ≤ ε < 1/6).
 # Parts: {a_j,b_j} for j∈[6] (each pair is one color) and {c_j} for j∈[4] (singletons).
 # a_j = j-1, b_j = j+5, c_j = j+11. Colors: a_j and b_j share color j-1; c_j has color j+5.
 # A = ({a_j},{b_j},{c_j}) = ({0..5},{6..11},{12..15}).
-# v(A_0)=v(A_1)=6+6eps, v(A_2)=4+4eps. Witness=2: not EF1 (4+4eps < 5+5eps after removal).
-# EEF cert for agent 2: B_1={0,1,2,6,7,8}, B_2={3,4,5,9,10,11}. v(B_1)=v(B_2)=3+6eps < 4+4eps.
+# v(A_0)=v(A_1)=6+6ε, v(A_2)=4+4ε. Witness=2: not EF1 (4+4ε < 5+5ε after removal).
+# EEF cert for agent 2: B_1={0,1,2,6,7,8}, B_2={3,4,5,9,10,11}. v(B_1)=v(B_2)=3+6ε < 4+4ε.
 _colors_eef_pmrf = [0,1,2,3,4,5, 0,1,2,3,4,5, 6,7,8,9]
 for shift, id_suffix in [(0, 'binary'), (Fraction(1, 12), 'positive-bival')]:
     v = PmrfValuation(_colors_eef_pmrf, default_cap=1, shift=shift)
@@ -571,7 +575,7 @@ for shift, id_suffix in [(0, 'binary'), (Fraction(1, 12), 'positive-bival')]:
     ))
 
 # PROP does not imply M1S (uniform matroid rank function).
-# v(X) = min(6, |X|): uniform matroid of rank 6 over 10 items. Binary marginals (eps=0).
+# v(X) = min(6, |X|): uniform matroid of rank 6 over 10 items. Binary marginals (ε=0).
 # Implemented as PmrfValuation with one color (cap=6): all items same color, cap 6.
 # A = ({0,...,3},{4,...,9}). v(A_0)=4, v(A_1)=6. PROP=min(6,10)/2=3. Both satisfy PROP.
 # Witness=0: M1S certificate must give agent 0 value ≥ 4, but every EF1 allocation gives ≤ ...
@@ -661,11 +665,11 @@ _cex_gmms_not_aps_binary_subadd = Counterexample(
 
 #=[ Supermodular Valuations ]===================================================
 # cex:ef-not-prop-supmod
-# f(x) = x*eps + max(0, x-k), giving supermodular v(S) = f(|S|).
-# Marginals: eps for |S| < k, 1+eps for |S| >= k (non-decreasing → supermodular).
-# Allocation: each of n agents gets 4 goods.  PROP = f(4n)/n = 4eps + (4n-k)/n * [k<4n].
+# f(x) = x*ε + max(0, x-k), giving supermodular v(S) = f(|S|).
+# Marginals: ε for |S| < k, 1+ε for |S| >= k (non-decreasing → supermodular).
+# Allocation: each of n agents gets 4 goods.  PROP = f(4n)/n = 4ε + (4n-k)/n * [k<4n].
 
-# n=2, k=5: 8 items.  PROP = 3/2 + 4eps.  f(4)=4eps < PROP.  f(5)=5eps < PROP.
+# n=2, k=5: 8 items.  PROP = 3/2 + 4ε.  f(4)=4ε < PROP.  f(5)=5ε < PROP.
 # No agent can be PROP1 or PROPm satisfied with ≤ 4 items; some agent always gets ≤ 4.
 for eps, id_suffix in [(0, 'n2-binary'), (Fraction(1, 28), 'n2-positive-bival')]:
     vals = [eps * i + max(0, i - 5) for i in range(9)]
@@ -679,10 +683,10 @@ for eps, id_suffix in [(0, 'n2-binary'), (Fraction(1, 28), 'n2-positive-bival')]
         violates   = 'PROP1|PROPm',
     ))
 
-# n=3, k=8: 12 items.  PROP = 4/3 + 4eps.  f(4)=4eps < PROP.
-# A is pairwise PROP (f(8)-f(4)=0 for binary; 4eps for positive-bival → f(4)+4eps=8eps < 4/3).
-# f(5)=5eps < PROP → not PROP1.  f(9)=1+9eps < PROP → not PROPx.
-# If eps=0: v(A_j | A_i) = f(8)-f(4)=0 for all i≠j → PROPavg.
+# n=3, k=8: 12 items.  PROP = 4/3 + 4ε.  f(4)=4ε < PROP.
+# A is pairwise PROP (f(8)-f(4)=0 for binary; 4ε for positive-bival → f(4)+4ε=8ε < 4/3).
+# f(5)=5ε < PROP → not PROP1.  f(9)=1+9ε < PROP → not PROPx.
+# If ε=0: v(A_j | A_i) = f(8)-f(4)=0 for all i≠j → PROPavg.
 for eps, id_suffix, satisfies, violates in [
         (0,              'n3-binary',        'PPROP+PROPavg', 'PROP1|PROPx'),
         (Fraction(1,28), 'n3-positive-bival','PPROP',         'PROP1'),
