@@ -646,7 +646,7 @@ _cex_paps_pprop_not_propm_binary_subadd = Counterexample(
     violates   = 'PROPm|M1S',
 )
 # COUNTEREXAMPLES.append(_cex_paps_pprop_not_propm_binary_subadd)
-# TODO: simplify example
+# TODO: can we speed this up?
 
 # GMMS does not imply APS (subadditive, binary).
 # 15 items, same partition as the additive GMMS example (sizes scaled by 96: cap=96).
