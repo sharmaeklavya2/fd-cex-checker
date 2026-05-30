@@ -271,8 +271,7 @@ _cex_propm_mixed_manna = Counterexample(
     satisfies  = 'GAPS',
     violates   = 'PROPm',
 )
-# COUNTEREXAMPLES.append(_cex_propm_mixed_manna)
-# TODO: implement PROPm for mixed manna
+COUNTEREXAMPLES.append(_cex_propm_mixed_manna)
 
 # PROPm does not imply PROPavg.
 # 3 agents, 3 goods. v=[60,60,30]. alloc=({2},{0,1},∅).
@@ -341,12 +340,11 @@ _cex_ef1_not_efx_mixed_ue = Counterexample(
     id         = 'cex:ef1-not-efx-mixed-ue',
     instance   = Instance([v, v], weights=[4, 1]),
     allocation = Allocation(bundles=[{1, 2, 3, 4}, {0}]),
-    witness    = 1,
+    witness    = 0,
     satisfies  = 'EF1',
     violates   = 'EFX',
 )
-# COUNTEREXAMPLES.append(_cex_ef1_not_efx_mixed_ue)
-# TODO: implement EFX for mixed manna
+COUNTEREXAMPLES.append(_cex_ef1_not_efx_mixed_ue)
 
 # WMMS and M1S are incompatible for chores.
 # 2 agents, 2 chores: v=[−1,−1]. Weights (9, 1) ≡ (0.9, 0.1).
