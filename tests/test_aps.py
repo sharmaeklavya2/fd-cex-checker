@@ -6,7 +6,6 @@ from collections.abc import Set
 import pytest
 
 from valuation import Rational, AdditiveValuation, UnitDemandValuation, GeneralValuation
-from notions.utils import all_subsets
 from instance import Instance
 from allocation import Allocation
 from notions.aps import aps_instance, is_aps_to, aps_ge
