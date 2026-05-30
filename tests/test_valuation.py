@@ -1,8 +1,12 @@
 """Tests for properties of valuation functions."""
 
-from valuation import AdditiveValuation, PmrfValuation, BinPackingValuation
+from fractions import Fraction
+
+from valuation import (Valuation, GeneralValuation, IdenticalItemsValuation,
+    AdditiveValuation, UnitDemandValuation, PmrfValuation, BinPackingValuation)
 from valuation.bin_pack import opt_bin_pack, first_fit_decreasing
 
+import pytest
 
 def test_neg():
     v1 = AdditiveValuation([3, 1, 0, -1, -3])
@@ -37,3 +41,27 @@ def test_bp_2():
     sizes, cap = [3, 2, 2, 3, 2, 2], 7
     assert first_fit_decreasing(sizes, cap) == 3
     assert opt_bin_pack(sizes, cap, 3) == 2
+
+#=[ General Valuation ]=========================================================
+
+V_LIST = [
+    AdditiveValuation([1]),
+    AdditiveValuation([2, 3, 4]),
+    UnitDemandValuation([2, 3, 4]),
+    PmrfValuation('rrggb', default_cap=10, shift=Fraction(1, 10)),
+    BinPackingValuation([3, 3, 2, 2, 2], cap=6),
+
+    IdenticalItemsValuation([0, 1]),  # single-item
+    IdenticalItemsValuation([0, 3, 6, 9]),  # additive
+    IdenticalItemsValuation([0, 3, 3, 3]),  # unit-demand
+    IdenticalItemsValuation([0, 5, 10, 14, 18]),  # submod
+    IdenticalItemsValuation([0, 10, 20, 31, 42]),  # supermod
+    IdenticalItemsValuation([0, 1, 1, 2, 2, 3]),  # subadd
+    IdenticalItemsValuation([0, 0, 1, 1, 2, 2]),  # superadd
+]
+
+@pytest.mark.parametrize("v", V_LIST)
+def test_func_types(v: Valuation) -> None:
+    for v in V_LIST:
+        v_gen = GeneralValuation(v.n_items(), v)
+        assert v.func_types() == v_gen.func_types()
