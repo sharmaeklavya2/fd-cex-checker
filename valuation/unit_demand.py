@@ -1,9 +1,7 @@
 from collections.abc import Sequence, Set
 
 from .base import Valuation, Rational
-from .base import SUBMOD_FTYPES, SI_FTYPES
-
-UNIT_DEM_FTYPES = SUBMOD_FTYPES | frozenset({'unitDemand', 'submodCanc', 'cancelable'})
+from .base import SUBMOD_FTYPES, SI_FTYPES, UNIT_DEM_FTYPES
 
 
 class UnitDemandValuation(Valuation):

@@ -10,6 +10,8 @@ SUPERADD_FTYPES = frozenset({'superadd', 'general'})
 SUPERMOD_FTYPES = frozenset({'supermod'}) | SUPERADD_FTYPES
 ADD_FTYPES = SUBMOD_FTYPES | SUPERMOD_FTYPES | frozenset({'additive', 'cancelable', 'submodCanc'})
 SI_FTYPES = ADD_FTYPES | frozenset({'unitDemand', 'singleItem'})
+UNIT_DEM_FTYPES = SUBMOD_FTYPES | frozenset({'unitDemand', 'submodCanc', 'cancelable'})
+
 
 class Valuation(ABC):
     """Abstract base class for valuation functions over sets of items."""

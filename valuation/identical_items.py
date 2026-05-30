@@ -1,8 +1,7 @@
 from collections.abc import Mapping, Set, Sequence
 
 from .base import Valuation, Rational
-from .base import SI_FTYPES, ADD_FTYPES, SUBADD_FTYPES, SUBMOD_FTYPES, SUPERADD_FTYPES, SUPERMOD_FTYPES
-from valuation.unit_demand import UNIT_DEM_FTYPES
+from .base import SI_FTYPES, ADD_FTYPES, SUBADD_FTYPES, SUBMOD_FTYPES, SUPERADD_FTYPES, SUPERMOD_FTYPES, UNIT_DEM_FTYPES
 
 
 def identify_ftype(marginals: Sequence[Rational]) -> frozenset[str]:
