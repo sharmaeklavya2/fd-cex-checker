@@ -1,6 +1,6 @@
 from fractions import Fraction
 
-from valuation import AdditiveValuation, UnitDemandValuation, PmrfValuation
+from valuation import AdditiveValuation, UnitDemandValuation, PmrfValuation, BinPackingValuation
 from instance import Instance
 from allocation import Allocation
 from counterexample import Counterexample
@@ -584,3 +584,75 @@ COUNTEREXAMPLES.append(Counterexample(
     satisfies  = 'PROP',
     violates   = 'M1S',
 ))
+
+#=[ Subadditive Valuations ]====================================================
+# BinPackingValuation(sizes, cap, shift): v(S) = min_bins(S) + |S|*shift.
+# ceil(|S|/k) = BinPackingValuation([1]*m, cap=k): each item has size 1, bin capacity k.
+# Scaling: sizes and cap can be scaled by any positive integer (same results).
+
+# GAPS does not imply PROP1 or EF1 (subadditive, 2 agents).
+# v(S) = ceil(|S|/4) over 9 items. A = ({0,1,2},{3,...,8}). Witness=0.
+# v(A_0)=1, v(A_1)=2, v(M)=3. PROP=3/2.
+# PROP1 fails: v(A_0 ∪ {g}) = ceil(4/4) = 1 ≤ 3/2 for all g ∉ A_0.
+# EF1 fails: v(A_1 ∖ {g}) = ceil(5/4) = 2 > v(A_0) = 1 for all g ∈ A_1.
+v = BinPackingValuation([1] * 9, cap=4)
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:gaps-not-ef1-prop1-subadd',
+    instance   = Instance([v, v]),
+    allocation = Allocation(bundles=[set(range(3)), set(range(3, 9))]),
+    witness    = 0,
+    satisfies  = 'GAPS',
+    violates   = 'PROP1|EF1',
+))
+
+# GAPS+PPROP does not imply PROP1 (subadditive, 3 agents, binary and positive-bival).
+# Items: sizes [1,1,3,3,3,3], cap=5 (equiv. [1/5,1/5,3/5,3/5,3/5,3/5], cap=1).
+# A = ({0,1},{2,3},{4,5}). Witness=0.
+# v(A_0)=1 (1+1=2≤5), v(A_1)=v(A_2)=2 (3+3=6>5). v(M)=4. PROP=4/3.
+# PROP1: v(A_0 ∪ {g}) = 1 bin (1+1+3=5≤5) → marginal gain 0. 1 ≯ 4/3 for any g ∉ A_0.
+for shift, id_suffix in [(0, 'binary'), (Fraction(1, 4), 'positive-bival')]:
+    v = BinPackingValuation([1, 1, 3, 3, 3, 3], cap=5, shift=shift)
+    COUNTEREXAMPLES.append(Counterexample(
+        id         = 'cex:gaps-not-prop1-subadd:' + id_suffix,
+        instance   = Instance([v] * 3),
+        allocation = Allocation(bundles=[{0, 1}, {2, 3}, {4, 5}]),
+        witness    = 0,
+        satisfies  = 'GAPS+PPROP',
+        violates   = 'PROP1',
+    ))
+
+# PAPS+PPROP does not imply PROPm or M1S (subadditive, 3 agents, binary).
+# Items: 7 of size 3, 21 of size 2, 21 of size 2 (scaled 5×: original sizes 0.6, 0.4, 0.4). Cap=5.
+# A = ({0,...,6},{7,...,27},{28,...,48}). Witness=0 (agent 1 in paper).
+# v(A_0)=7, v(A_1)=v(A_2)=11. v(M)=25. PROP=25/3.
+# PROPm: min claimable gain from A_1 (of size 2, adding to A_0 of size 3) = 0. 7+0 ≯ 25/3. Fails.
+# M1S: any EF1 certificate B has |B_0| ≤ 14, leaving ≥ 35 items for others → some bundle ≥ 9 bins,
+#       and removing one item drops by at most 1 → still ≥ 8 > 7 = v(A_0). Not EF1. Contradiction.
+# cex:paps-pprop-not-propm-binary-subadd: not appended — 49 items causes OOM in checker.
+v = BinPackingValuation([3] * 7 + [2] * 42, cap=5)
+_cex_paps_pprop_not_propm_binary_subadd = Counterexample(
+    id         = 'cex:paps-pprop-not-propm-binary-subadd',
+    instance   = Instance([v] * 3),
+    allocation = Allocation(bundles=[set(range(7)), set(range(7, 28)), set(range(28, 49))]),
+    witness    = 0,
+    satisfies  = 'PAPS+PPROP',
+    violates   = 'PROPm|M1S',
+)
+# COUNTEREXAMPLES.append(_cex_paps_pprop_not_propm_binary_subadd)
+
+# GMMS does not imply APS (subadditive, binary).
+# 15 items, same partition as the additive GMMS example (sizes scaled by 96: cap=96).
+# APS ≥ 2 (from 6 sets each of size 97/96, hence value 2), MMS = 1 (total > 3 × 96/96).
+# Leximin allocation: same bundles as additive case → v(A_0)=2, v(A_1)=2, v(A_2)=1. Witness=2.
+# cex:gmms-not-aps-binary-subadd: not appended — GMMS check over 15 items causes OOM/timeout.
+_sizes_gmms_subadd = [65, 31, 31, 31, 23, 23, 23, 17, 11, 7, 7, 7, 5, 5, 5]
+v = BinPackingValuation(_sizes_gmms_subadd, cap=96)
+_cex_gmms_not_aps_binary_subadd = Counterexample(
+    id         = 'cex:gmms-not-aps-binary-subadd',
+    instance   = Instance([v] * 3),
+    allocation = Allocation(bundles=[{0,8,9,10,11}, {1,2,3,14}, {4,5,6,7,12,13}]),
+    witness    = 2,
+    satisfies  = 'GMMS',
+    violates   = 'APS',
+)
+# COUNTEREXAMPLES.append(_cex_gmms_not_aps_binary_subadd)
