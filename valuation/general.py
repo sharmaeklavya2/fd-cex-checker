@@ -1,11 +1,15 @@
 from collections.abc import Collection, Mapping, Set
 import itertools
+from typing import Callable
 
 from .base import Valuation, Rational
 from .base import SI_FTYPES, ADD_FTYPES, UNIT_DEM_FTYPES, SUBMOD_FTYPES, SUBADD_FTYPES, SUPERMOD_FTYPES, SUPERADD_FTYPES
 
 
-def get_marginals(m: int, values: Mapping[frozenset[int], Rational]) -> Set[Rational]:
+VFunc = Callable[[Set[int]], Rational]
+VMap = Mapping[frozenset[int], Rational]
+
+def get_marginals(m: int, values: VMap) -> Set[Rational]:
     """
     `values` maps all subsets of range(m) to a number.
     Find the set of all marginal values.
@@ -25,7 +29,7 @@ def all_subsets(a: Collection[int]) -> list[frozenset[int]]:
     return [frozenset(S) for r in range(m + 1) for S in itertools.combinations(a, r)]
 
 
-def get_ftypes(m: int, values: Mapping[frozenset[int], Rational]) -> frozenset[str]:
+def get_ftypes(m: int, values: VMap) -> frozenset[str]:
     """
     `values` maps all subsets of range(m) to a number.
     Identify the type of valuation function (submodular, superadditive, etc.)
@@ -86,13 +90,17 @@ def get_ftypes(m: int, values: Mapping[frozenset[int], Rational]) -> frozenset[s
 
 
 class GeneralValuation(Valuation):
-    def __init__(self, m: int, values: Mapping[frozenset[int], Rational]):
+    def __init__(self, m: int, vmap_or_vfunc: VMap | VFunc):
         assert m > 0
+        if isinstance(vmap_or_vfunc, Mapping):
+            values = vmap_or_vfunc
+            assert len(values) == 2**m
+            for S in values.keys():
+                for g in S:
+                    assert g in range(m)
+        else:
+            values = {S: vmap_or_vfunc(S) for S in all_subsets(range(m))}
         assert values[frozenset()] == 0
-        assert len(values) == 2**m
-        for S in values.keys():
-            for g in S:
-                assert g in range(m)
         self._m = m
         self._values = values
 

@@ -1,10 +1,11 @@
 """Tests for APS (Any Price Share) fairness."""
 
 from fractions import Fraction
+from collections.abc import Set
 
 import pytest
 
-from valuation import AdditiveValuation, UnitDemandValuation, GeneralValuation
+from valuation import Rational, AdditiveValuation, UnitDemandValuation, GeneralValuation
 from notions.utils import all_subsets
 from instance import Instance
 from allocation import Allocation
@@ -132,19 +133,20 @@ class TestOrigApsPaperExamples:
         # Remark 2: example with submodular valuations
         m = 6
         C = {frozenset({0, 1, 2}), frozenset({0, 4, 5}), frozenset({1, 3, 5}), frozenset({2, 3, 4})}
-        values = {}
-        for S in all_subsets(m):
-            if len(S) == 0:
-                values[S] = 0
-            elif len(S) == 1:
-                values[S] = 1
-            elif len(S) == 2:
-                values[S] = 4
-            elif len(S) == 3 and S not in C:
-                values[S] = 5
-            else:
-                values[S] = 6
-        v = GeneralValuation(m, values)
+        def f(S: Set[int]) -> Rational:
+            match len(S):
+                case 0:
+                    return 0
+                case 1:
+                    return 2
+                case 2:
+                    return 4
+                case 3:
+                    return 5 if frozenset(S) not in C else 6
+                case _:
+                    return 6
+        v = GeneralValuation(m, f)
+        assert 'submod' in v.func_types()
         half = Fraction(1, 2)
         assert aps_ge(v, half, 6)
         assert not aps_ge(v, half, 7)
