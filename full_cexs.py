@@ -1,6 +1,9 @@
+from collections.abc import Set
 from fractions import Fraction
 
-from valuation import AdditiveValuation, UnitDemandValuation, PmrfValuation, BinPackingValuation, IdenticalItemsValuation
+from valuation import Rational
+from valuation import (AdditiveValuation, UnitDemandValuation, PmrfValuation, BinPackingValuation,
+    IdenticalItemsValuation, GeneralValuation)
 from instance import Instance
 from allocation import Allocation
 from counterexample import Counterexample
@@ -701,3 +704,35 @@ for eps, id_suffix, satisfies, violates in [
         satisfies  = satisfies,
         violates   = violates,
     ))
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Submodular general valuation
+# cex:mms-not-aps-n2-submod:positive
+# C = {{0,1,2},{0,4,5},{1,3,5},{2,3,4}} (0-indexed; paper uses 1-indexed)
+# vhat(X) = v(X) + |X|*eps, where:
+#   v(X) = 0 if X=∅; 2 if |X|=1; 4 if |X|=2; 6 if X∈C or |X|≥4; 5 if |X|=3, X∉C
+# Marginals: 2+eps (|X|≤1), {1+eps,2+eps} (|X|=2), {eps,1+eps} (|X|=3), eps (|X|=4).
+# Non-increasing → submodular.  MMS = 5+3eps (best partition splits C-set / non-C-set).
+# APS = 6+3eps (dual: set x_S=1/4 for S∈C).  No APS allocation exists.
+# Allocation: A_0={0,1,2} (∈C, value 6+3eps), A_1={3,4,5} (∉C, value 5+3eps=MMS). Witness=1.
+_C_submod = {frozenset({0,1,2}), frozenset({0,4,5}), frozenset({1,3,5}), frozenset({2,3,4})}
+_eps_submod = Fraction(1, 4)
+
+def _v_submod(X: Set[int]) -> Rational:
+    s = frozenset(X)
+    n = len(s)
+    base = _eps_submod * n
+    if n == 0: return 0
+    if n == 1: return 2 + base
+    if n == 2: return 4 + base
+    if s in _C_submod or n >= 4: return 6 + base
+    return 5 + base
+
+COUNTEREXAMPLES.append(Counterexample(
+    id         = 'cex:mms-not-aps-n2-submod:positive',
+    instance   = Instance([GeneralValuation(6, _v_submod)] * 2),
+    allocation = Allocation(bundles=[{0, 1, 2}, {3, 4, 5}]),
+    witness    = 1,
+    satisfies  = 'MMS',
+    violates   = 'APS',
+))
