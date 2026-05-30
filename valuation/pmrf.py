@@ -67,3 +67,9 @@ class PmrfValuation(Valuation, Generic[T]):
         min_marg, max_marg = self._marginal_range
         distinct_vals = 1 if min_marg == max_marg else 2
         return distinct_vals <= k
+
+    def __repr__(self) -> str:
+        if self._shift > 0:
+            return f"{type(self).__name__}({self._colors!r}, caps={self._caps!r}, shift={self._shift!r})"
+        else:
+            return f"{type(self).__name__}({self._colors!r}, caps={self._caps!r})"

@@ -3,6 +3,8 @@ from collections.abc import Sequence, Set
 from .base import Valuation, Rational
 from .base import SUBMOD_FTYPES, SI_FTYPES
 
+UNIT_DEM_FTYPES = SUBMOD_FTYPES | frozenset({'unitDemand', 'submodCanc', 'cancelable'})
+
 
 class UnitDemandValuation(Valuation):
     """
@@ -29,7 +31,7 @@ class UnitDemandValuation(Valuation):
         else:
             self._marginal_range = (shift, shift + self._values_sorted[-1])
             if shift == 0:
-                self._func_types = SUBMOD_FTYPES | frozenset({'unitDemand', 'submodCanc', 'cancelable'})
+                self._func_types = UNIT_DEM_FTYPES
             elif m <= 3:
                 self._func_types = SUBMOD_FTYPES | frozenset({'submodCanc', 'cancelable'})
             else:

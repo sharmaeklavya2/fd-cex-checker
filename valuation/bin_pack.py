@@ -3,9 +3,7 @@ from fractions import Fraction
 from collections.abc import Sequence, Set
 
 from .base import Rational, Valuation
-from .base import SI_FTYPES, ADD_FTYPES
-
-BINPACK_FTYPES = frozenset({'subadd', 'general'})
+from .base import SI_FTYPES, ADD_FTYPES, SUBADD_FTYPES
 
 
 def first_fit_decreasing(sizes: Sequence[Rational], cap: Rational) -> int:
@@ -123,4 +121,10 @@ class BinPackingValuation(Valuation):
         elif min_marg == max_marg:
             return ADD_FTYPES
         else:
-            return BINPACK_FTYPES
+            return SUBADD_FTYPES
+
+    def __repr__(self) -> str:
+        if self._shift > 0:
+            return f"{type(self).__name__}({self._sizes!r}, cap={self._cap!r}, shift={self._shift!r})"
+        else:
+            return f"{type(self).__name__}({self._sizes!r}, cap={self._cap!r})"

@@ -4,8 +4,11 @@ from collections.abc import Set
 
 Rational = int | Fraction
 
-SUBMOD_FTYPES = frozenset({'submod', 'xos', 'subadd', 'general'})
-ADD_FTYPES = SUBMOD_FTYPES | frozenset({'additive', 'cancelable', 'submodCanc', 'supermod', 'superadd'})
+SUBADD_FTYPES = frozenset({'subadd', 'general'})
+SUBMOD_FTYPES = frozenset({'submod', 'xos'}) | SUBADD_FTYPES
+SUPERADD_FTYPES = frozenset({'superadd', 'general'})
+SUPERMOD_FTYPES = frozenset({'supermod'}) | SUPERADD_FTYPES
+ADD_FTYPES = SUBMOD_FTYPES | SUPERMOD_FTYPES | frozenset({'additive', 'cancelable', 'submodCanc'})
 SI_FTYPES = ADD_FTYPES | frozenset({'unitDemand', 'singleItem'})
 
 class Valuation(ABC):
