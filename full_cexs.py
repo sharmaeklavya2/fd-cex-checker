@@ -634,7 +634,7 @@ for shift, id_suffix in [(0, 'binary'), (Fraction(1, 4), 'positive-bival')]:
 # M1S: any EF1 certificate B has |B_0| ≤ 14, leaving ≥ 35 items for others → some bundle ≥ 9 bins,
 #       and removing one item drops by at most 1 → still ≥ 8 > 7 = v(A_0). Not EF1. Contradiction.
 # cex:paps-pprop-not-propm-binary-subadd: not appended — 49 items causes OOM in checker.
-v = BinPackingValuation([3] * 7 + [2] * 42, cap=5)
+v = BinPackingValuation([51] * 7 + [49] * 42, cap=100)
 _cex_paps_pprop_not_propm_binary_subadd = Counterexample(
     id         = 'cex:paps-pprop-not-propm-binary-subadd',
     instance   = Instance([v] * 3),
